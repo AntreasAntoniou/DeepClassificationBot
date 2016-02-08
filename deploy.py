@@ -42,11 +42,13 @@ def apply_model(X, model, categories):
 
 if __name__ == '__main__':
     test_image_path = ''
+    test_image_folder = ''
 
     model = load_model()
 
     mean, categories = data.get_metadata()
 
+    #images = get_data_from_folder(test_image_folder)
     images = get_data_from_file(test_image_path)
 
     apply_model(images, model, categories)
