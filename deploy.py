@@ -29,7 +29,7 @@ def get_data_from_file(filepath):
     return image
 
 def apply_model(X, model, categories):
-    model=Sequential()
+    model = Sequential()
     y = []
     for image in X:
         y_temp = model.predict_proba(X=X, batch_size=128)
@@ -45,6 +45,8 @@ if __name__ == '__main__':
 
     model = load_model()
 
+    mean, categories = data.get_metadata()
+
     images = get_data_from_file(test_image_path)
-    
-    apply_model(images, model, mean)
+
+    apply_model(images, model, categories)
