@@ -22,6 +22,7 @@ def run(epochs=150, split=0.1):
     for i in range(epochs):
         metadata = model.fit(X=X_train, y=y_train, batch_size=128, nb_epoch=1, verbose=1, validation_data=[X_test, y_test])
         current_loss=metadata.history['loss'][-1]
+        print("Loss: "+str(current_loss))
         if current_loss<best_performance:
             model.save_weights("model_weights.h5df", overwrite=True)
             best_performance=current_loss
