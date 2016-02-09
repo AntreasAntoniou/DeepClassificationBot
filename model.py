@@ -10,6 +10,10 @@ from keras.regularizers import l2
 from keras import backend as K
 
 def get_model():
+    '''Builds a Deep Convolutional Neural Network of architecture VGG-Net as described in
+       paper http://arxiv.org/pdf/1409.1556.pdf
+       Returns the model ready for compilation and training or predictions
+    '''
     conv = Sequential()
 
     conv.add(Convolution2D(64, 3, 3, activation='relu', input_shape=(3, 256, 256)))
@@ -56,6 +60,9 @@ def get_model():
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))
     conv.add(BatchNormalization())
     conv.add(Dropout(0.5))
-
+    conv.add(Dense(4096))
+    conv.add(Dropout(0.5))
+    conv.add(Dense(100))
+    conv.add(Activation('softmax'))
     print(conv.summary())
     return conv
