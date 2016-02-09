@@ -211,11 +211,12 @@ class GoogleImageExtractor(object):
 if __name__ == '__main__':
     import name_extractor
     choice = 4
-    list=name_extractor.get_top_n_shows(1000)
-    list = ['car', 'place', 'mecha']#remove
+    query_list = name_extractor.get_top_n_shows(50)
+    print(query_list)
+    #query_list = ['car', 'place', 'mecha']#remove
     if choice ==4:
         """test the downloading of files"""
         w = GoogleImageExtractor('')#leave blanks if get the search list from file
         w.set_num_image_to_dl(50)
-        w.set_searchlist(list)#replace the searclist
+        w.set_searchlist(query_list)#replace the searclist
         w.multi_search_download()

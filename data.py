@@ -35,7 +35,7 @@ def extract_data(size=256):
     return X, y
 
 
-def preprocess_data(X, y):
+def preprocess_data(X, y, save=True):
     '''Preprocesses the data that have already been extracted with extract_data() method
        Attributes:
            X: A list containing images of shape (3, width, height)
@@ -72,7 +72,10 @@ def preprocess_data(X, y):
     np_utils.to_categorical(y_temp, 1000)
     print(X.shape)
     print(y_temp.shape)
-    return X, y_temp
+    if save:
+        np.save("data/X.npy", X)
+        np.save("data/y.npy", y)
+
 
 
 def get_metadata():
@@ -87,6 +90,12 @@ def get_metadata():
 
     return mean, categories
 
+def load_data():
+
+    X = np.load("data/X.npy")
+    y = np.load("data/y.npy")
+
+    return X, y
 
 def resize(img, size):
     """resize image into size x size

@@ -9,7 +9,7 @@ Make sure you have a GPU as the training is very compute intensive
 
 1. Install CUDA_toolkit 7.5
 2. Install cuDNN 4
-3. Install theano, using `pip install theano`
+3. Install theano, using `sudo pip install git+git://github.com/Theano/Theano.git`
 4. Make sure you have Python 2.7.6 and virtualenv installed on your system
 5. Install Python dependencies
 
@@ -18,9 +18,6 @@ $ virtualenv --python=python2 env
 $ . env/bin/activate
 $ pip install -r requirements.txt
 ```
-
-3. Install theano, using `sudo pip install git+git://github.com/Theano/Theano.git`
-4. Run `pip install -r requirements.txt`
 
 **To download images**
 
