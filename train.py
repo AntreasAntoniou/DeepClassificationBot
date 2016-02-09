@@ -5,6 +5,8 @@ import model as m
 
 
 def run(epochs=150, split=0.1):
+    '''Does the routine required to get the data, put them in needed format and start training the model
+       saves weights whenever the model produces a better test result and keeps track of the best loss'''
 
     print("Extracting data...")
     X, y = data.extract_data()
@@ -27,3 +29,6 @@ def run(epochs=150, split=0.1):
             model.save_weights("model_weights.h5df", overwrite=True)
             best_performance=current_loss
             print("Saving weights..")
+
+if __name__== '__main__':
+    run()
