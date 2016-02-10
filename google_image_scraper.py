@@ -11,7 +11,7 @@ from pattern.web import URL, extension, cache, plaintext, Newsfeed, DOM
 
 class GoogleImageExtractor(object):
 
-    def __init__(self, search_key = '' ):
+    def __init__(self, search_key=''):
         """ Google image search class
             Args:
                 search_key to be entered.
@@ -165,17 +165,17 @@ class GoogleImageExtractor(object):
         file_ext = os.path.splitext(url_link)[1] #use for checking valid pic ext
         temp_filename = pic_prefix_str + file_ext
         temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename )
-        folder_name=temp_filename_full_path.split("/")
+        folder_name = temp_filename_full_path.split("/")
         if not os.path.exists(temp_filename_full_path.replace(folder_name[-1], "")):
             os.makedirs(temp_filename_full_path.replace(folder_name[-1], ""))
         valid_image_ext_list = ['.png','.jpg','.jpeg', '.gif', '.bmp', '.tiff'] #not comprehensive
 
         url = URL(url_link)
         if url.redirect:
-            return # if there is re-direct, return
+            return  #if there is re-direct, return
 
         if file_ext not in valid_image_ext_list:
-            return #return if not valid image extension
+            return  #return if not valid image extension
 
         f = open(temp_filename_full_path, 'wb') # save as test.gif
         print url_link

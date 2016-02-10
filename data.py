@@ -72,9 +72,8 @@ def preprocess_data(X, y, save=True):
     np_utils.to_categorical(y_temp, 1000)
     print(X.shape)
     print(y_temp.shape)
-    if save:
-        np.save("data/X.npy", X)
-        np.save("data/y.npy", y)
+    np.save("data/X.npy", X)
+    np.save("data/y.npy", y)
 
 
 
