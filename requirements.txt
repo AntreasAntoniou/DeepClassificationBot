@@ -1,7 +1,6 @@
 keras
 numpy
 pandas
-pytest==2.8.7
 requests==2.9.1
 selenium
 theano
