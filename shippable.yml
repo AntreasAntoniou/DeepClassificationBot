@@ -1,0 +1,19 @@
+language: python
+
+python:
+  - 2.7
+
+# for image shippableimages/ubuntu1204_python
+before_install:
+  - mkdir -p $HOME/env/
+  - virtualenv -p $SHIPPABLE_PYTHON $HOME/env/
+  - source $HOME/env/bin/activate
+
+install:
+  - pip install flake8 --use-mirrors
+
+before_script:
+  - mkdir -p shippable/codecoverage shippable/testresults
+
+script:
+  - flake8 --verbose .
