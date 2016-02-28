@@ -10,10 +10,11 @@ before_install:
   - source $HOME/env/bin/activate
 
 install:
-  - pip install flake8 --use-mirrors
+  - pip install flake8 pytest requests
 
 before_script:
   - mkdir -p shippable/codecoverage shippable/testresults
 
 script:
+  - PYTHONPATH=. py.test --junit-xml=shippable/testresults/results.xml
   - flake8 --verbose .
