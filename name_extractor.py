@@ -12,7 +12,7 @@ TRAILING_KIND_RE = re.compile(r'\s+\(\w+\)$')
 
 
 def get_top_n_shows(n):
-    '''Returns top n shows from Anime News Network'''
+    """Returns top n shows from Anime News Network"""
     assert n <= 1000
     params = {'id': ANN_ANIME_RATINGS_REPORT_ID, 'nlist': n, 'nskip': 0}
     response = requests.get(ANN_REPORTS_URL, params=params)

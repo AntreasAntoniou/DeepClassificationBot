@@ -15,7 +15,7 @@ def load_model():
 
 def get_data_from_folder(test_image_folder):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
-    mean, categories = data.get_metadata()
+    categories = data.get_metadata()
     dir = os.path.dirname(os.path.abspath(__file__))
     images = []
     for subdir, dir, files in os.walk(dir+"/"+test_image_folder+"/"):
@@ -24,14 +24,14 @@ def get_data_from_folder(test_image_folder):
             image = cv2.imread(filepath)
             image = data.resize(image)
             image = image.astype(np.float32)
-            image = (image - mean) / 255
+            image = (image) / 255
             images.append(image)
 
 def get_data_from_file(filepath):
     '''Get image from file ready to be used with the deep neural network'''
-    mean, categories = data.get_metadata()
+    categories = data.get_metadata()
     image = cv2.imread(filepath)
-    image = (image - mean) / 255
+    image = (image) / 255
 
     return image
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
 
     model = load_model()
 
-    mean, categories = data.get_metadata()
+    categories = data.get_metadata()
 
     #images = get_data_from_folder(test_image_folder)
     images = get_data_from_file(test_image_path)
