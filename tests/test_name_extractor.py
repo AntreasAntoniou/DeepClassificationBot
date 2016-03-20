@@ -11,7 +11,7 @@ def test_top_n_shows(monkeypatch):
     ]:
         monkeypatch.setattr(requests, 'get', mock_get(report))
         shows = name_extractor.get_top_n_shows(100)
-        assert shows == expected
+        assert shows['items'] == expected
 
 
 def mock_get(content):
