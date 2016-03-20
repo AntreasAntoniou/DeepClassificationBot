@@ -6,3 +6,4 @@ FROM kaixhin/theano:latest
 RUN apt-get update && apt-get install -y python-pandas
 COPY ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
+RUN pip install virtualenv
