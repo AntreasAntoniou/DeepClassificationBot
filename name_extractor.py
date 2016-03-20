@@ -58,9 +58,9 @@ def _extract_anime_characters(root):
                 seen_names.add(name)
 
 
-def print_csv(field_items, f=sys.stdout, only_fields=None):
-    writer = csv.writer(codecs.getwriter('utf8')(f))
-    fields = field_items['fields'] if only_fields is None else only_fields
+def print_csv(field_items, fileobj=sys.stdout, fields=None):
+    writer = csv.writer(codecs.getwriter('utf8')(fileobj))
+    fields = field_items['fields'] if fields is None else fields
     writer.writerow(fields)
     for row in field_items['items']:
         writer.writerow([row[field] for field in fields])
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.what == 'shows':
-        print_csv(get_top_n_shows(args.n), ['name'])
+        print_csv(get_top_n_shows(args.n), fields=['name'])
     elif args.what == 'characters':
         shows = get_top_n_shows(args.n)
-        print_csv(list_characters(shows), ['anime_name', 'name'])
+        print_csv(list_characters(shows), fields=['anime_name', 'name'])
