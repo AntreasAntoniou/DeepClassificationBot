@@ -46,12 +46,16 @@ def _extract_anime_characters(root):
     for anime in root.iter('anime'):
         anime_id = anime.get('id')
         anime_name = anime.get('name')
+        seen_names = set()
         for role in anime.findall("cast[@lang='JA']/role"):
-            yield {
-                'anime_id': anime_id,
-                'anime_name': anime_name,
-                'name': role.text,
-            }
+            name = role.text
+            if name not in seen_names:
+                yield {
+                    'anime_id': anime_id,
+                    'anime_name': anime_name,
+                    'name': role.text,
+                }
+                seen_names.add(name)
 
 
 def print_csv(field_items, f=sys.stdout, only_fields=None):
