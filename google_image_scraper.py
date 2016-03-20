@@ -1,4 +1,6 @@
 import re, os, sys, datetime, time
+import socket
+
 import pandas
 from selenium import webdriver
 from contextlib import closing
@@ -88,13 +90,14 @@ class GoogleImageExtractor(object):
         self.target_url_str = self.prefix_of_search_url + self.g_search_key +\
                                 self.postfix_of_search_url
 
-    def retrieve_source_fr_html(self):
+    def retrieve_source_fr_html(self, driver):
         """ Make use of selenium. Retrieve from html table using pandas table.
 
         """
-        driver = webdriver.Firefox()
-        driver.get(self.target_url_str)
-
+        try:
+            driver.get(self.target_url_str)
+        except:
+            print("Connection refused")
         ## wait for log in then get the page source.
         try:
             driver.execute_script("window.scrollTo(0, 30000)")
@@ -109,11 +112,14 @@ class GoogleImageExtractor(object):
 
         except:
             print 'not able to find'
-            driver.quit()
+            #driver.quit()
 
-        self.page_source = driver.page_source
+        try:
+            self.page_source = driver.page_source
+        except socket.error:
+            print("Socket broke")
 
-        driver.close()
+
 
     def extract_pic_url(self):
         """ extract all the raw pic url in list
@@ -131,6 +137,7 @@ class GoogleImageExtractor(object):
 
     def multi_search_download(self):
         """ Mutli search download"""
+        driver = webdriver.Firefox()
         for indiv_search in self.g_search_key_list:
             self.pic_url_list = []
             self.pic_info_list = []
@@ -138,11 +145,12 @@ class GoogleImageExtractor(object):
             self.g_search_key = indiv_search
 
             self.formed_search_url()
-            self.retrieve_source_fr_html()
+
+            self.retrieve_source_fr_html(driver)
             self.extract_pic_url()
             self.downloading_all_photos() #some download might not be jpg?? use selnium to download??
             self.save_infolist_to_file()
-
+        driver.close()
     def downloading_all_photos(self):
         """ download all photos to particular folder
 
@@ -170,23 +178,29 @@ class GoogleImageExtractor(object):
             os.makedirs(temp_filename_full_path.replace(folder_name[-1], ""))
         valid_image_ext_list = ['.png','.jpg','.jpeg', '.gif', '.bmp', '.tiff'] #not comprehensive
 
-        url = URL(url_link)
-        if url.redirect:
-            return  #if there is re-direct, return
-
-        if file_ext not in valid_image_ext_list:
-            return  #return if not valid image extension
-
-        f = open(temp_filename_full_path, 'wb') # save as test.gif
-        print url_link
-        self.pic_info_list.append(pic_prefix_str + ': ' + url_link )
+        url = URL(url_link.replace("%2F","/").replace("%3A",":"))
         try:
-            f.write(url.download())#if have problem skip
-        except:
+            if url.redirect:
+                return  #if there is re-direct, return
+            if file_ext not in valid_image_ext_list:
+                return  #return if not valid image extension
+
+            f = open(temp_filename_full_path, 'wb') # save as test.gif
+            print url_link
+            self.pic_info_list.append(pic_prefix_str + ': ' + url_link )
+
+            image = url.download()
+            import matplotlib.pyplot as p
+            #p.imshow(image)
+            #p.show(image)
+            f.write(image)#if have problem skip
+
             #if self.__print_download_fault:
             print 'Problem with processing this data: ', url_link
             self.download_fault =1
-        f.close()
+            f.close()
+        except:
+            pass
 
     def create_folder(self):
         """
@@ -203,10 +217,10 @@ class GoogleImageExtractor(object):
         """
         temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt' )
 
-        with  open(temp_filename_full_path, 'w') as f:
-            for n in self.pic_info_list:
-                f.write(n)
-                f.write('\n')
+        # with  open(temp_filename_full_path, 'w') as f:
+        #     for n in self.pic_info_list:
+        #         f.write(n)
+        #         f.write('\n')
 
 if __name__ == '__main__':
     import name_extractor
@@ -217,6 +231,6 @@ if __name__ == '__main__':
     if choice ==4:
         """test the downloading of files"""
         w = GoogleImageExtractor('')#leave blanks if get the search list from file
-        w.set_num_image_to_dl(50)
+        w.set_num_image_to_dl(2000)
         w.set_searchlist(query_list)#replace the searclist
         w.multi_search_download()

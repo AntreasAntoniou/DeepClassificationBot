@@ -4,6 +4,7 @@ import os
 import cv2
 import numpy as np
 from keras.utils import np_utils
+import matplotlib.pyplot as p
 
 
 def extract_data(size=256):
@@ -18,20 +19,22 @@ def extract_data(size=256):
     X = []
     y = []
     dir = os.path.dirname(os.path.abspath(__file__))
+    count = 0
 
     for subdir, dir, files in os.walk(dir+"/downloaded_images/"):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
                 bits = subdir.split("/")
                 category = bits[-1]
-                print(category)
+                #print(category)
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
                 if image is not None:
                     image = resize(image, size=size)
                     X.append(image)
                     y.append(category)
-
+                print(count)
+                count = count+1
     return X, y
 
 
@@ -54,24 +57,21 @@ def preprocess_data(X, y, save=True):
     y_temp = []
     for label in y:  # encode y with the unique ids
         y_temp.append(categories[label])
-
+    #print(y_temp)
     y_temp = np.array(y_temp)
     X = X.astype(np.float32)
-    mean = X.mean()  # get mean
+    mean = X.mean(axis=0)  # get mean
 
     # save mean
-    fo = open("mean.txt", 'wb+')
-    output = "mean,"+str(mean)+"\n"
-    fo.write(output)
-    fo.close()
+    #np.save("data/mean.npy", mean)
 
     # save categories for future use
     pickle.dump(categories, open("categories.p", "wb"))
 
-    X = (X-mean) / 255  # Scale by 255 to get the inputs in the range 0 - 1 so that the CNN can understand them
-    np_utils.to_categorical(y_temp, 1000)
+    X = (X) / (255)  # Scale by 255 to get the inputs in the range 0 - 1 so that the CNN can understand them
+    y = np_utils.to_categorical(y_temp, 50)
     print(X.shape)
-    print(y_temp.shape)
+    print(y.shape)
     np.save("data/X.npy", X)
     np.save("data/y.npy", y)
 
@@ -80,21 +80,49 @@ def preprocess_data(X, y, save=True):
 def get_metadata():
     '''Load metadata'''
 
-    fo = open("mean.txt", 'r')
-    lines = fo.readlines()
-    line = lines[0]
-    bits = line.split(",")
-    mean = float(bits[-1])
+    #fo = open("mean.txt", 'r')
+    #lines = fo.readlines()
+    #line = lines[0]
+    #bits = line.split(",")
+    #mean = float(bits[-1])
     categories = pickle.load(open("categories.p", "rb"))
 
-    return mean, categories
+    return categories
 
 def load_data():
 
     X = np.load("data/X.npy")
     y = np.load("data/y.npy")
 
+    X_res = np.zeros((X.shape[0], X.shape[1], 128, 128))
+    for i in range(len(X)):
+        for channel in range(len(X[i])):
+            X_res[i, channel]= cv2.resize(X[i, channel], dsize=(128, 128))
+            #p.imshow(X_res[i, channel])
+            #p.show()
+    X = np.array(X_res)
     return X, y
+
+def augment_data(X_train, random_angle_max=360, mirroring_probability=0.5):
+
+    X_augmented = np.zeros((X_train.shape[0], X_train.shape[1], 128, 128))
+    for i in range(len(X_train)):
+        random_angle = random.randint(0, random_angle_max)
+        mirror_decision = random.randint(0, 100)
+        flip_orientation = random.randint(0, 1)
+        for channel in range(len(X_train[i])):
+            rows,cols = X_train[i, channel].shape
+            M = cv2.getRotationMatrix2D((cols/2,rows/2),random_angle,1)
+            rotated_image = cv2.warpAffine(X_train[i, channel],M,(cols,rows))
+            if mirror_decision<mirroring_probability*100:
+                X_augmented[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)
+            else:
+                X_augmented[i, channel] = rotated_image
+            #p.imshow(X_augmented[i, channel])
+            #p.show()
+    X_train = np.array(X_augmented)
+    return X_train
+
 
 def resize(img, size):
     """resize image into size x size
@@ -116,9 +144,9 @@ def split_data(X, y, split_ratio=0.1):
     for i in range(X.shape[0]):
         decision = random.randint(0, 99)
         if decision < (100-(split_ratio*100)):
-            test_idx.append(i)
-        else:
             train_idx.append(i)
+        else:
+            test_idx.append(i)
     X_train = X[train_idx]
     X_test = X[test_idx]
     y_train = y[train_idx]
