@@ -3,7 +3,7 @@ FROM kaixhin/theano:latest
 # $ docker build -t tag -f dockerfiles/ci/Dockerfile .
 # (in order to copy requirements.txt)
 
-RUN apt-get update && apt-get install -y python-pandas
+RUN apt-get update && apt-get install -y python-pandas language-pack-en-base
 COPY ./requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 RUN pip install virtualenv
