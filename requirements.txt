@@ -2,6 +2,7 @@ backports.csv==1.0.1
 keras
 numpy
 pandas
+pattern
 requests==2.9.1
 selenium
 theano
