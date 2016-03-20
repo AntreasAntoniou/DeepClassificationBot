@@ -6,8 +6,8 @@ import name_extractor
 
 def test_top_n_shows(monkeypatch):
     for report, expected in [
-            (two_items, ['Steins;Gate', 'Fullmetal Alchemist: Brotherhood']),
-            (no_items, []),
+            (two_shows, [['Steins;Gate'], ['Fullmetal Alchemist: Brotherhood']]),
+            (no_shows, []),
     ]:
         monkeypatch.setattr(requests, 'get', mock_get(report))
         shows = name_extractor.get_top_n_shows(100)
@@ -23,7 +23,7 @@ def mock_get(content):
 MockResponse = collections.namedtuple('Response', 'content')
 
 
-two_items = '''
+two_shows = '''
 <report>
   <item id="11770">
     <anime href="/encyclopedia/anime.php?id=11770">Steins;Gate (TV)</anime>
@@ -34,7 +34,7 @@ two_items = '''
 </report>
 '''
 
-no_items = '''
+no_shows = '''
 <report>
 </report>
 '''
