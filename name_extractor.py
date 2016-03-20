@@ -8,7 +8,7 @@ import requests
 
 ANN_REPORTS_URL = 'http://www.animenewsnetwork.com/encyclopedia/reports.xml'
 ANN_ANIME_RATINGS_REPORT_ID = 172
-TRAILING_KIND_RE = re.compile(r'\s+\(\w+\)$')
+TRAILING_KIND_RE = re.compile(r'\s+\([^)]+\)$')
 
 
 def get_top_n_shows(n):

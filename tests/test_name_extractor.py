@@ -29,7 +29,7 @@ two_shows = '''
     <anime href="/encyclopedia/anime.php?id=11770">Steins;Gate (TV)</anime>
   </item>
   <item id="10216">
-    <anime href="/encyclopedia/anime.php?id=10216">Fullmetal Alchemist: Brotherhood (TV)</anime>
+    <anime href="/encyclopedia/anime.php?id=10216">Fullmetal Alchemist: Brotherhood (TV 2/2011)</anime>
   </item>
 </report>
 '''
