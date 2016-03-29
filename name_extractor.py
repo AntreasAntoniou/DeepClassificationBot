@@ -24,7 +24,7 @@ def get_top_n_shows(n):
     root = ElementTree.fromstring(response.content)
     return {
         'fields': ['id', 'name'],
-        'items': map(lambda item: {'id': item.get('id'), 'name': _extract_item_name(item)}, root.iter('item'))
+        'items': [{'id': item.get('id'), 'name': _extract_item_name(item)} for item in root.iter('item')]
     }
 
 

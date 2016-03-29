@@ -233,7 +233,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     csv_input = codecs.getreader('utf8')(args.csv)
-    queries = map(lambda row: ' '.join(row.values()), csv.DictReader(csv_input))
+    queries = [' '.join(row.values()) for row in csv.DictReader(csv_input)]
 
     w = GoogleImageExtractor('')  # leave blanks if get the search list from file
     w.set_num_image_to_dl(args.n)
