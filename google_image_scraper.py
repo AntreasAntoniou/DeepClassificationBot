@@ -85,8 +85,8 @@ class GoogleImageExtractor(object):
             Set to self.sp_search_url_list
         '''
         self.reformat_search_for_spaces()
-        self.target_url_str = self.prefix_of_search_url + self.g_search_key +\
-                                self.postfix_of_search_url
+        self.target_url_str = self.prefix_of_search_url + self.g_search_key + \
+            self.postfix_of_search_url
 
     def retrieve_source_fr_html(self, driver):
         """ Make use of selenium. Retrieve from html table using pandas table.

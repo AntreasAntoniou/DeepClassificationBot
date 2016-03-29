@@ -66,8 +66,9 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     for label in y:  # get all the unique categories
         categories.add(label)
 
-    categories = dict(zip(categories, range(len(categories))))  # build a dictionary that maps categories in string form
-                                                                # to a unique id
+    # build a dictionary that maps categories in string form to a unique id
+    categories = dict(zip(categories, range(len(categories))))
+
     y_temp = []
     for label in y:  # encode y with the unique ids
         y_temp.append(categories[label])
