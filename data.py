@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import division
 import pickle
 import random
 import os
@@ -151,7 +152,7 @@ def augment_data(X_train, random_angle_max=180, mirroring_probability=0.5):
         flip_orientation = random.randint(0, 1)
         for channel in range(len(X_train[i])):
             rows, cols = X_train[i, channel].shape
-            M = cv2.getRotationMatrix2D((cols / 2, rows / 2), random_angle, 1)
+            M = cv2.getRotationMatrix2D((cols // 2, rows // 2), random_angle, 1)
             rotated_image = cv2.warpAffine(X_train[i, channel], M, (cols, rows))
             if mirror_decision < mirroring_probability * 100:
                 X_train[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)

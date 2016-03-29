@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import division
 
 import h5py
 
@@ -36,8 +37,7 @@ running.
 def get_top_n_error(preds, y, n):
     index_of_true = np.argmax(y, axis=1)
     index_of_preds = np.argsort(preds, axis=1)
-    total = float(len(y))
-    correct = float(0)
+    correct = 0
 
     for i in range(len(index_of_true)):
         for j in range(1, n + 1):
@@ -45,8 +45,8 @@ def get_top_n_error(preds, y, n):
                 correct = correct + 1
                 break
 
-    accuracy = float(correct / total)
-
+    total = len(y)
+    accuracy = correct / total
     return accuracy
 
 
