@@ -61,7 +61,6 @@ def get_data_from_file(filepath, size=256, mean=None):
 def apply_model(X, model, categories, multi=False, top_k=3):
     '''Apply model and produce top k predictions for given images'''
     y = []
-
     if not multi:
         X = np.array([X])
         y_temp = model.predict_proba(X=X, batch_size=1)
