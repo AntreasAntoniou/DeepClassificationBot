@@ -1,8 +1,5 @@
 language: python
 
-python:
-  - 2.7
-
 env:
   matrix:
     - TEST_GROUP=pytest
@@ -13,7 +10,7 @@ parallelized_test: true
 
 before_install:
   - mkdir -p $HOME/env/
-  - virtualenv -p $SHIPPABLE_PYTHON $HOME/env/ --system-site-packages
+  - virtualenv -p /usr/bin/python2.7 $HOME/env/ --system-site-packages
   - source $HOME/env/bin/activate
 
 install:
