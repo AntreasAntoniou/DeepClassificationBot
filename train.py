@@ -6,20 +6,20 @@ import model as m
 def get_top_n_error(preds, y, n):
     index_of_true = np.argmax(y, axis=1)
     index_of_preds = np.argsort(preds, axis=1)
-    total = len(y)
-    correct = 0
+    total = float(len(y))
+    correct = float(0)
 
     for i in range(len(index_of_true)):
         for j in range(1, n+1):
-            if index_of_true[i] == index_of_preds[-j]:
+            if index_of_true[i] == index_of_preds[i,-j]:
                 correct = correct+1
                 break
 
-    accuracy = correct/total
+    accuracy = float(correct/total)
 
     return accuracy
 
-def run(epochs=500, split=0.1, extract=False, cont=True):
+def run(epochs=500, split=0.1, extract=True, cont=True):
     '''Does the routine required to get the data, put them in needed format and start training the model
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
     if extract:
@@ -35,10 +35,10 @@ def run(epochs=500, split=0.1, extract=False, cont=True):
 
     print("Building and Compiling model..")
     print(y.shape)
-    model = m.get_model(y_train.shape[1])
+    model = m.get_model(100)
 
     if cont:
-        model.load_weights("pre_trained_weights/model_weights.hdf5")
+        model.load_weights_until_layer("pre_trained_weights/model_weights.hdf5",30)
     model.compile(optimizer='adam', loss='categorical_crossentropy')
 
     print("Training..")
@@ -61,6 +61,7 @@ def run(epochs=500, split=0.1, extract=False, cont=True):
             model.save_weights("pre_trained_weights/model_weights.hdf5", overwrite=True)
             best_performance=current_val_loss
             print("Saving weights..")
+        model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
 
 if __name__ == '__main__':
     run()
