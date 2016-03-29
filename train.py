@@ -1,8 +1,5 @@
 import h5py
 
-from keras.models import Sequential
-from keras.preprocessing.image import ImageDataGenerator
-
 import data
 import numpy as np
 import model as m

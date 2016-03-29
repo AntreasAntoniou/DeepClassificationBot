@@ -1,4 +1,3 @@
-from keras.models import Sequential
 import model as m
 import os
 import data

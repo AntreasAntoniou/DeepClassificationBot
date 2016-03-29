@@ -4,9 +4,9 @@ import os
 import cv2
 import numpy as np
 from keras.utils import np_utils
-import matplotlib.pyplot as p
 import h5py
 from keras.utils.io_utils import HDF5Matrix
+
 '''This module provides all the methods needed for data extraction, preprocessing, storing and retrieval.
    A deep neural network is nothing but a bunch of random parameters without massive amounts of high quality data
    to train it on, and as such a large percentage of project time was spent building the data.py methods. Our main
@@ -107,12 +107,14 @@ def get_categories():
 
     return categories
 
+
 def produce_train_indices(dataset_indx, number_of_samples, val_indx):
     dataset_indx = np.delete(dataset_indx, val_indx)
     np.random.seed(seed=None)
     train = np.random.choice(dataset_indx, size=number_of_samples)
     train = np.unique(train)
     return (np.sort(train)).tolist()
+
 
 def produce_validation_indices(dataset_indx, number_of_samples):
     np.random.seed(2048)
@@ -123,14 +125,13 @@ def produce_validation_indices(dataset_indx, number_of_samples):
 
 
 def load_dataset_bit_from_hdf5(train_indices, val_indices, only_train=True):
-
-     if only_train:
+    if only_train:
         h5f = h5py.File('data.hdf5','r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         h5f.close()
         return X_train, y_train
-     else:
+    else:
         h5f = h5py.File('data.hdf5','r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]

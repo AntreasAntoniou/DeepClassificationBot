@@ -1,15 +1,9 @@
-import re, os, sys, datetime, time
+import os
+import time
+import re
 import socket
-
-import pandas
 from selenium import webdriver
-from contextlib import closing
-from selenium.webdriver import Firefox
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-
-from pattern.web import URL, extension, cache, plaintext, Newsfeed, DOM
+from pattern.web import URL, DOM
 
 '''Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader adapted for our project
     Special thanks to shuvronewscred for his project'''
@@ -194,7 +188,7 @@ class GoogleImageExtractor(object):
             self.pic_info_list.append(pic_prefix_str + ': ' + url_link )
 
             image = url.download()
-            import matplotlib.pyplot as p
+            #import matplotlib.pyplot as p
             #p.imshow(image)
             #p.show(image)
             f.write(image)#if have problem skip
