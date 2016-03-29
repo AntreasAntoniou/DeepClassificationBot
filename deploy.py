@@ -18,6 +18,7 @@ def load_model(input_shape, n_outputs=100):
     return model
 
 
+
 def get_data_from_folder(test_image_folder, mean=None, size=256):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
     #dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,6 +39,7 @@ def get_data_from_folder(test_image_folder, mean=None, size=256):
                     images.append(image)
 
     return np.array(images), names
+
 
 
 def get_data_from_file(filepath, size=256, mean=None):
@@ -84,6 +86,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
                     res.append(str(categories[sample[item]])+": "+str(y_temp[0, sample[item]]))
             y.append(res)
     return y
+
 
 if __name__ == '__main__':
     import h5py

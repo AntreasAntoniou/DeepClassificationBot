@@ -5,11 +5,12 @@ import socket
 from selenium import webdriver
 from pattern.web import URL, DOM
 
+
 '''Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader adapted for our project
     Special thanks to shuvronewscred for his project'''
 
-class GoogleImageExtractor(object):
 
+class GoogleImageExtractor(object):
     def __init__(self, search_key=''):
         """ Google image search class
             Args:
@@ -116,8 +117,6 @@ class GoogleImageExtractor(object):
         except socket.error:
             print("Socket broke")
 
-
-
     def extract_pic_url(self):
         """ extract all the raw pic url in list
 
@@ -148,9 +147,9 @@ class GoogleImageExtractor(object):
             self.downloading_all_photos() #some download might not be jpg?? use selnium to download??
             self.save_infolist_to_file()
         driver.close()
+
     def downloading_all_photos(self):
         """ download all photos to particular folder
-
         """
         self.create_folder()
         pic_counter = 1

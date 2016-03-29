@@ -5,6 +5,7 @@ import numpy as np
 import model as m
 import argparse
 
+
 '''
 This module provides all the methods needed to train and validation test a deep neural network. Training includes:
 1. Data Extraction or Loading already extracted data
@@ -28,6 +29,7 @@ running.
 '''
 
 
+
 def get_top_n_error(preds, y, n):
     index_of_true = np.argmax(y, axis=1)
     index_of_preds = np.argsort(preds, axis=1)
@@ -43,6 +45,7 @@ def get_top_n_error(preds, y, n):
     accuracy = float(correct/total)
 
     return accuracy
+
 
 
 def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True, size=256, top_k=5):
@@ -111,6 +114,7 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
 
 
+
 def extract_data(size=256):
     print("Extracting data..")
     X, y = data.extract_data(size=256)
@@ -119,6 +123,7 @@ def extract_data(size=256):
     X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
 
     return X, y, nb_samples, num_categories
+
 
 if __name__ == '__main__':
     import argparse
