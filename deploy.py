@@ -21,7 +21,7 @@ def load_model(input_shape, n_outputs=100):
 
 def get_data_from_folder(test_image_folder, mean=None, size=256):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
-    #dir = os.path.dirname(os.path.abspath(__file__))
+    # dir = os.path.dirname(os.path.abspath(__file__))
     images = []
     names = []
     for subdir, dir, files in os.walk(test_image_folder):
@@ -91,7 +91,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
 
 if __name__ == '__main__':
     import h5py
-    #If used as script then run example use case
+    # If used as script then run example use case
     import sys
     import urllib
     image_size = 128 #change this to match your image size
@@ -123,8 +123,8 @@ if __name__ == '__main__':
         categories_to_strings[categories[key]] = key
 
     model = load_model(input_shape=image_size, n_outputs=n_categories)
-    #this should be run once and kept in memory for all predictions
-                         # as re-loading it is very time consuming
+    # this should be run once and kept in memory for all predictions
+    # as re-loading it is very time consuming
 
     if folder:
         images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)

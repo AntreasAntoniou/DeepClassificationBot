@@ -104,7 +104,6 @@ def get_categories():
     '''Load categories names'''
 
     categories = pickle.load(open("data/categories.p", "rb"))
-
     return categories
 
 
