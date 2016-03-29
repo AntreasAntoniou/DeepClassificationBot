@@ -212,8 +212,8 @@ class GoogleImageExtractor(object):
         """ Save the info list to file.
 
         """
-        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt')
-
+        pass
+        # temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt')
         # with  open(temp_filename_full_path, 'w') as f:
         #     for n in self.pic_info_list:
         #         f.write(n)

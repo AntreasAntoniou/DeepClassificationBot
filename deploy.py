@@ -27,7 +27,6 @@ def get_data_from_folder(test_image_folder, mean=None, size=256):
     for subdir, dir, files in os.walk(test_image_folder):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
-                bits = subdir.split("/")
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
                 if image is not None:
