@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import print_function
 import os
 import time
 import re
@@ -24,7 +25,7 @@ class GoogleImageExtractor(object):
         elif type(search_key) == list:
             self.g_search_key_list = search_key
         else:
-            print 'google_search_keyword not of type str or list'
+            print('google_search_keyword not of type str or list')
             raise
 
         self.g_search_key = ''
@@ -110,7 +111,7 @@ class GoogleImageExtractor(object):
             driver.execute_script("window.scrollTo(0, 60000)")
 
         except:
-            print 'not able to find'
+            print('not able to find')
             # driver.quit()
 
         try:
@@ -130,7 +131,7 @@ class GoogleImageExtractor(object):
             try:
                 self.pic_url_list.append(tar_str.group(1))
             except:
-                print 'error parsing', tag
+                print('error parsing', tag)
 
     def multi_search_download(self):
         """ Mutli search download"""
@@ -155,7 +156,7 @@ class GoogleImageExtractor(object):
         self.create_folder()
         pic_counter = 1
         for url_link in self.pic_url_list:
-            print pic_counter
+            print(pic_counter)
             pic_prefix_str = self.g_search_key + "/" + self.g_search_key + str(pic_counter)
             self.download_single_image(url_link.encode(), pic_prefix_str)
             pic_counter = pic_counter + 1
@@ -184,7 +185,7 @@ class GoogleImageExtractor(object):
                 return  # return if not valid image extension
 
             f = open(temp_filename_full_path, 'wb')  # save as test.gif
-            print url_link
+            print(url_link)
             self.pic_info_list.append(pic_prefix_str + ': ' + url_link)
 
             image = url.download()
@@ -194,7 +195,7 @@ class GoogleImageExtractor(object):
             f.write(image)  # if have problem skip
 
             # if self.__print_download_fault:
-            print 'Problem with processing this data: ', url_link
+            print('Problem with processing this data: ', url_link)
             self.download_fault = 1
             f.close()
         except:
