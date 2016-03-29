@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import model as m
 import os
 import data

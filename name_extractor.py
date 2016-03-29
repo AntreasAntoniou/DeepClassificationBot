@@ -1,6 +1,7 @@
 '''
 Scrapes anime names from various sources.
 '''
+from __future__ import absolute_import
 import sys
 import codecs
 import re
