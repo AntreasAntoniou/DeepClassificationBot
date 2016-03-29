@@ -148,10 +148,10 @@ def augment_data(X_train, random_angle_max=180, mirroring_probability=0.5):
         mirror_decision = random.randint(0, 100)
         flip_orientation = random.randint(0, 1)
         for channel in range(len(X_train[i])):
-            rows,cols = X_train[i, channel].shape
-            M = cv2.getRotationMatrix2D((cols/2,rows/2),random_angle,1)
-            rotated_image = cv2.warpAffine(X_train[i, channel],M,(cols,rows))
-            if mirror_decision<mirroring_probability*100:
+            rows, cols = X_train[i, channel].shape
+            M = cv2.getRotationMatrix2D((cols / 2, rows / 2), random_angle, 1)
+            rotated_image = cv2.warpAffine(X_train[i, channel], M, (cols, rows))
+            if mirror_decision < mirroring_probability * 100:
                 X_train[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)
             else:
                 X_train[i, channel] = rotated_image
@@ -177,7 +177,7 @@ def split_data(X, y, split_ratio=0.5):
     test_idx = []
     for i in range(X.shape[0]):
         decision = random.randint(0, 99)
-        if decision < (100-(split_ratio*100)):
+        if decision < (100 - (split_ratio * 100)):
             train_idx.append(i)
         else:
             test_idx.append(i)

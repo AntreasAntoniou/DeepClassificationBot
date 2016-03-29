@@ -68,7 +68,7 @@ class GoogleImageExtractor(object):
             Args:
                 filename (str): full file path
         """
-        with open(filename,'r') as f:
+        with open(filename, 'r') as f:
             self.g_search_key_list = f.readlines()
 
     def set_searchlist(self, search_list):
@@ -155,9 +155,9 @@ class GoogleImageExtractor(object):
         pic_counter = 1
         for url_link in self.pic_url_list:
             print pic_counter
-            pic_prefix_str = self.g_search_key +"/"+ self.g_search_key + str(pic_counter)
+            pic_prefix_str = self.g_search_key + "/" + self.g_search_key + str(pic_counter)
             self.download_single_image(url_link.encode(), pic_prefix_str)
-            pic_counter = pic_counter +1
+            pic_counter = pic_counter + 1
 
     def download_single_image(self, url_link, pic_prefix_str):
         """ Download data according to the url link given.
@@ -168,14 +168,14 @@ class GoogleImageExtractor(object):
         self.download_fault = 0
         file_ext = os.path.splitext(url_link)[1] #use for checking valid pic ext
         temp_filename = pic_prefix_str + file_ext
-        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename )
-        temp_filename_full_path = temp_filename_full_path.replace("+"," ")
+        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename)
+        temp_filename_full_path = temp_filename_full_path.replace("+", " ")
         folder_name = temp_filename_full_path.split("/")
         if not os.path.exists(temp_filename_full_path.replace(folder_name[-1], "")):
             os.makedirs(temp_filename_full_path.replace(folder_name[-1], ""))
-        valid_image_ext_list = ['.png','.jpg','.jpeg', '.gif', '.bmp', '.tiff'] #not comprehensive
+        valid_image_ext_list = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff'] #not comprehensive
 
-        url = URL(url_link.replace("%2F","/").replace("%3A",":"))
+        url = URL(url_link.replace("%2F", "/").replace("%3A", ":"))
         try:
             if url.redirect:
                 return  #if there is re-direct, return
@@ -184,7 +184,7 @@ class GoogleImageExtractor(object):
 
             f = open(temp_filename_full_path, 'wb') # save as test.gif
             print url_link
-            self.pic_info_list.append(pic_prefix_str + ': ' + url_link )
+            self.pic_info_list.append(pic_prefix_str + ': ' + url_link)
 
             image = url.download()
             #import matplotlib.pyplot as p
@@ -194,7 +194,7 @@ class GoogleImageExtractor(object):
 
             #if self.__print_download_fault:
             print 'Problem with processing this data: ', url_link
-            self.download_fault =1
+            self.download_fault = 1
             f.close()
         except:
             pass
@@ -212,7 +212,7 @@ class GoogleImageExtractor(object):
         """ Save the info list to file.
 
         """
-        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt' )
+        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt')
 
         # with  open(temp_filename_full_path, 'w') as f:
         #     for n in self.pic_info_list:

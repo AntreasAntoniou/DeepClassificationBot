@@ -37,12 +37,12 @@ def get_top_n_error(preds, y, n):
     correct = float(0)
 
     for i in range(len(index_of_true)):
-        for j in range(1, n+1):
+        for j in range(1, n + 1):
             if index_of_true[i] == index_of_preds[i, -j]:
-                correct = correct+1
+                correct = correct + 1
                 break
 
-    accuracy = float(correct/total)
+    accuracy = float(correct / total)
 
     return accuracy
 
@@ -102,14 +102,14 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         current_loss = metadata.history['loss'][-1]
         current_val_loss = metadata.history['val_loss'][-1]
         preds = model.predict_proba(X_val, batch_size=64)
-        print("Loss: "+str(current_loss))
-        print("Val_loss: "+str(current_val_loss))
+        print("Loss: " + str(current_loss))
+        print("Val_loss: " + str(current_val_loss))
 
         top_3_error = get_top_n_error(preds, y_val, top_k)
         print("Top 3 error: "+str(top_3_error))
-        if current_val_loss<best_performance:
+        if current_val_loss < best_performance:
             model.save_weights("pre_trained_weights/model_weights.hdf5", overwrite=True)
-            best_performance=current_val_loss
+            best_performance = current_val_loss
             print("Saving weights..")
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
 

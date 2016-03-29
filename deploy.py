@@ -62,6 +62,7 @@ def get_data_from_file(filepath, size=256, mean=None):
 def apply_model(X, model, categories, multi=False, top_k=3):
     '''Apply model and produce top k predictions for given images'''
     y = []
+
     if not multi:
         X = np.array([X])
         y_temp = model.predict_proba(X=X, batch_size=1)
@@ -71,7 +72,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
             sample = sample.tolist()
             sample.reverse()
             for item in sample:
-                res.append(str(categories[item])+": "+str(y_temp[0, item]))
+                res.append(str(categories[item]) + ": " + str(y_temp[0, item]))
         return res
     else:
         for image in X:
@@ -83,7 +84,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
                 sample = sample.tolist()
                 sample.reverse()
                 for item in range(top_k):
-                    res.append(str(categories[sample[item]])+": "+str(y_temp[0, sample[item]]))
+                    res.append(str(categories[sample[item]]) + ": " + str(y_temp[0, sample[item]]))
             y.append(res)
     return y
 
@@ -105,7 +106,7 @@ if __name__ == '__main__':
     if sys.argv[1] == "--URL":
         link = sys.argv[2]
         bits = link.split("/")
-        test_image_path = "downloaded_images/"+str(bits[-1])
+        test_image_path = "downloaded_images/" + str(bits[-1])
         urllib.urlretrieve(link, test_image_path)
         image = True
     elif sys.argv[1] == "--image_path":
@@ -135,7 +136,7 @@ if __name__ == '__main__':
             print("Image Name: {}".format(str(names[i])))
             print(" Categories: ")
             for j in range(5):
-                print("{0}. {1}".format(j+1, item[j]*100))
+                print("{0}. {1}".format(j + 1, item[j] * 100))
             print("______________________________________________")
     elif image:
         images, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
@@ -144,5 +145,5 @@ if __name__ == '__main__':
         print("Image Name: {}".format(name))
         print("Categories: ")
         for i in range(5):
-            print("{0}. {1}".format(i+1, y[i]))
+            print("{0}. {1}".format(i + 1, y[i]))
         print("_________________________________________________")
