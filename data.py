@@ -7,7 +7,7 @@ from keras.utils import np_utils
 import matplotlib.pyplot as p
 
 
-def extract_data(size=256):
+def extract_data(rootdir=None, size=256):
     '''Extracts the data from the downloaded_images folders
         Attributes:
             size: The size to which to resize the images. All images must be the same size so that
@@ -18,10 +18,14 @@ def extract_data(size=256):
 
     X = []
     y = []
-    dir = os.path.dirname(os.path.abspath(__file__))
+    if rootdir is not None:
+        dir = rootdir
+    else:
+        dir = os.path.dirname(os.path.abspath(__file__)) + "/downloaded_images/"
+
     count = 0
 
-    for subdir, dir, files in os.walk(dir+"/downloaded_images/"):
+    for subdir, dir, files in os.walk(dir):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
                 bits = subdir.split("/")
@@ -38,7 +42,7 @@ def extract_data(size=256):
     return X, y
 
 
-def preprocess_data(X, y, save=True):
+def preprocess_data(X, y, save=True, preset=None):
     '''Preprocesses the data that have already been extracted with extract_data() method
        Attributes:
            X: A list containing images of shape (3, width, height)
@@ -61,20 +65,25 @@ def preprocess_data(X, y, save=True):
     y_temp = np.array(y_temp)
     X = X.astype(np.float32)
     mean = X.mean(axis=0)  # get mean
-
+    X = X - X.mean(axis=0)
+    print(y_temp)
     # save mean
-    #np.save("data/mean.npy", mean)
+    np.save("data/mean.npy", mean)
 
     # save categories for future use
     pickle.dump(categories, open("categories.p", "wb"))
 
-    X = (X) / (255)  # Scale by 255 to get the inputs in the range 0 - 1 so that the CNN can understand them
-    y = np_utils.to_categorical(y_temp, 50)
+    y = np_utils.to_categorical(y_temp, 100)
+    if preset is not None:
+        y = np_utils.to_categorical(y_temp, preset)
+
     print(X.shape)
     print(y.shape)
-    np.save("data/X.npy", X)
-    np.save("data/y.npy", y)
+    if save:
+        np.save("data/X.npy", X)
+        np.save("data/y.npy", y)
 
+    return X, y
 
 
 def get_metadata():
@@ -93,7 +102,7 @@ def load_data():
 
     X = np.load("data/X.npy")
     y = np.load("data/y.npy")
-
+    X = (X) / (255)
     X_res = np.zeros((X.shape[0], X.shape[1], 128, 128))
     for i in range(len(X)):
         for channel in range(len(X[i])):
@@ -103,9 +112,7 @@ def load_data():
     X = np.array(X_res)
     return X, y
 
-def augment_data(X_train, random_angle_max=360, mirroring_probability=0.5):
-
-    X_augmented = np.zeros((X_train.shape[0], X_train.shape[1], 128, 128))
+def augment_data(X_train, training_set_size = 10000, random_angle_max=360, mirroring_probability=0.5):
     for i in range(len(X_train)):
         random_angle = random.randint(0, random_angle_max)
         mirror_decision = random.randint(0, 100)
@@ -115,12 +122,12 @@ def augment_data(X_train, random_angle_max=360, mirroring_probability=0.5):
             M = cv2.getRotationMatrix2D((cols/2,rows/2),random_angle,1)
             rotated_image = cv2.warpAffine(X_train[i, channel],M,(cols,rows))
             if mirror_decision<mirroring_probability*100:
-                X_augmented[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)
+                X_train[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)
             else:
-                X_augmented[i, channel] = rotated_image
-            #p.imshow(X_augmented[i, channel])
+                X_train[i, channel] = rotated_image
+            #print(X_train[i, channel])
+            #p.imshow(X_train[i, channel])
             #p.show()
-    X_train = np.array(X_augmented)
     return X_train
 
 

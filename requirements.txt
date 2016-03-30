@@ -1,8 +1,9 @@
-requests==2.9.1
-wsgiref==0.1.2
+backports.csv==1.0.1
+keras
 numpy
+pandas
+pattern
+requests==2.9.1
 selenium
 theano
-keras
-pandas
-
+wsgiref==0.1.2

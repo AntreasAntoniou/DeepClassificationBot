@@ -223,14 +223,22 @@ class GoogleImageExtractor(object):
         #         f.write('\n')
 
 if __name__ == '__main__':
-    import name_extractor
-    choice = 4
-    query_list = name_extractor.get_top_n_shows(50)
-    print(query_list)
-    #query_list = ['car', 'place', 'mecha']#remove
-    if choice ==4:
-        """test the downloading of files"""
-        w = GoogleImageExtractor('')#leave blanks if get the search list from file
-        w.set_num_image_to_dl(2000)
-        w.set_searchlist(query_list)#replace the searclist
+    import argparse
+    from backports import csv
+    import codecs
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('csv', nargs='?', type=argparse.FileType('rb'))
+    parser.add_argument('-n', type=int, default=2000)
+    parser.add_argument('--dry-run', action='store_true', default=False)
+    args = parser.parse_args()
+
+    csv_input = codecs.getreader('utf8')(args.csv)
+    queries = map(lambda row: ' '.join(row.values()), csv.DictReader(csv_input))
+
+    w = GoogleImageExtractor('')#leave blanks if get the search list from file
+    w.set_num_image_to_dl(args.n)
+    w.set_searchlist(queries)#replace the searclist
+
+    if not args.dry_run:
         w.multi_search_download()
