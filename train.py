@@ -32,10 +32,10 @@ def run(epochs=500, split=0.1, extract=True, cont=True):
     print("Loading data..")
     X, y = data.load_data()
     X_train, y_train, X_test, y_test = data.split_data(X, y, split_ratio=split)
-
+    num_categories = y_test.shape[1]
     print("Building and Compiling model..")
     print(y.shape)
-    model = m.get_model(100)
+    model = m.get_model(num_categories)
 
     if cont:
         model.load_weights_until_layer("pre_trained_weights/model_weights.hdf5",30)

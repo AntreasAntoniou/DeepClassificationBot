@@ -66,7 +66,7 @@ def get_model(n_outputs=1000):
     conv.add(Dense(2048))
     conv.add(Dropout(0.5))
     conv.add(Dense(2048))
-    conv.add(Dropout(0.5))
+    conv.add(Dropout(0.7))
     conv.add(Dense(n_outputs))
     conv.add(Activation('softmax'))
     print(conv.summary())

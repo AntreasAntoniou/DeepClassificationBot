@@ -19,13 +19,13 @@ def extract_data(rootdir=None, size=256):
     X = []
     y = []
     if rootdir is not None:
-        dir = rootdir
+        search_folder = rootdir
     else:
-        dir = os.path.dirname(os.path.abspath(__file__)) + "/downloaded_images/"
+        search_folder = os.path.dirname(os.path.abspath(__file__)) + "/downloaded_images/"
 
     count = 0
 
-    for subdir, dir, files in os.walk(dir):
+    for subdir, dir, files in os.walk(search_folder):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
                 bits = subdir.split("/")
@@ -38,7 +38,7 @@ def extract_data(rootdir=None, size=256):
                     X.append(image)
                     y.append(category)
                 print(count)
-                count = count+1
+                count = count + 1
     return X, y
 
 
@@ -73,7 +73,7 @@ def preprocess_data(X, y, save=True, preset=None):
     # save categories for future use
     pickle.dump(categories, open("categories.p", "wb"))
 
-    y = np_utils.to_categorical(y_temp, 100)
+    y = np_utils.to_categorical(y_temp, max(y_temp)+1)
     if preset is not None:
         y = np_utils.to_categorical(y_temp, preset)
 
@@ -112,7 +112,7 @@ def load_data():
     X = np.array(X_res)
     return X, y
 
-def augment_data(X_train, training_set_size = 10000, random_angle_max=360, mirroring_probability=0.5):
+def augment_data(X_train, random_angle_max=360, mirroring_probability=0.5):
     for i in range(len(X_train)):
         random_angle = random.randint(0, random_angle_max)
         mirror_decision = random.randint(0, 100)
