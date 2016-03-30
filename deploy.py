@@ -13,7 +13,7 @@ def load_model(n_outputs=100):
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
-def get_data_from_folder(test_image_folder):
+def get_data_from_folder(test_image_folder, size=256):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
     #dir = os.path.dirname(os.path.abspath(__file__))
     images = []
@@ -27,12 +27,12 @@ def get_data_from_folder(test_image_folder):
                 if image is not None:
                     image = image - mean
                     image = image / 255
-                    image = data.resize(image, size=128)
+                    image = data.resize(image, size=size)
                     images.append(image)
                     print(len(images))
     return np.array(images)
 
-def get_data_from_file(filepath, size=128):
+def get_data_from_file(filepath, size=256):
     '''Get image from file ready to be used with the deep neural network'''
     import data
 
