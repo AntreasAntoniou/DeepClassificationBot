@@ -35,12 +35,9 @@ def get_data_from_folder(test_image_folder, size=256):
 def get_data_from_file(filepath, size=256):
     '''Get image from file ready to be used with the deep neural network'''
     import data
-
     image = cv2.imread(filepath)
-    print(image.shape)
     image = (image) / 255
     image = data.resize(image, size)
-    print(image.shape)
 
     return image
 
