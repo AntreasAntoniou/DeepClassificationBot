@@ -21,7 +21,7 @@ def get_model(n_outputs=1000):
     conv.add(ZeroPadding2D((1, 1)))
     conv.add(Convolution2D(64, 3, 3, activation='relu'))
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    conv.add(BatchNormalization())
+    #conv.add(BatchNormalization())
     #conv.add(Dropout(0.5))
 
     conv.add(ZeroPadding2D((1, 1)))
@@ -29,7 +29,7 @@ def get_model(n_outputs=1000):
     conv.add(ZeroPadding2D((1, 1)))
     conv.add(Convolution2D(128, 3, 3, activation='relu'))
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    conv.add(BatchNormalization())
+    #conv.add(BatchNormalization())
     #conv.add(Dropout(0.5))
 
     conv.add(ZeroPadding2D((1, 1)))
@@ -39,7 +39,7 @@ def get_model(n_outputs=1000):
     conv.add(ZeroPadding2D((1, 1)))
     conv.add(Convolution2D(256, 3, 3, activation='relu'))
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    conv.add(BatchNormalization())
+    #conv.add(BatchNormalization())
     #conv.add(Dropout(0.5))
 
     conv.add(ZeroPadding2D((1, 1)))
@@ -49,7 +49,7 @@ def get_model(n_outputs=1000):
     conv.add(ZeroPadding2D((1, 1)))
     conv.add(Convolution2D(512, 3, 3, activation='relu'))
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    conv.add(BatchNormalization())
+    #conv.add(BatchNormalization())
     # conv.add(Dropout(0.5))
 
     conv.add(ZeroPadding2D((1, 1)))
