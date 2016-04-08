@@ -6,7 +6,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import data
 import numpy as np
 import model as m
-
+import argparse
 
 def get_top_n_error(preds, y, n):
     index_of_true = np.argmax(y, axis=1)
@@ -88,6 +88,29 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
             print("Saving weights..")
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
 
-if __name__ == '__main__':
-    run()
+def extract_data():
+    print("Extracting data..")
+    X, y = data.extract_data(size=128)
 
+    print("Preprocessing data..")
+    X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
+
+    return X, y, nb_samples, num_categories
+
+if __name__ == '__main__':
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--extract_data', dest='extract_data', action='store_const',const=True, default=False)
+    parser.add_argument('--run', dest='run', action='store_const', const=True, default=False)
+    parser.add_argument('--continue', dest='continue_training', action='store_const', const=True, default=False)
+    args = parser.parse_args()
+
+    extract_mode = args.extract_data
+    run_mode = args.run
+    continue_ = args.continue_training
+
+    if run_mode:
+        run(extract=extract_mode, cont=continue_)
+    elif extract_mode:
+        extract_data()
