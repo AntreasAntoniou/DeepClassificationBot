@@ -40,15 +40,16 @@ types of fruits, names of gundams etc. Set the number of images to the number of
 
 **To train your network**
 
-1. Once all of the above have been met then you are ready to train your network, by running `python train.py run -load=True` to load data from HDF5 files or
+1. Once all of the above have been met then you are ready to train your network, by running `python train.py --run` to load data from HDF5 files or `python train.py --run --extract_data` to extract data and train in one procedure.
+2. If you want to continue training a model, you can. After each epoch the weights are saved. If you want to continue training simply run `python train.py --run --continue`
 
 
 **Deploying a model**
 
 1. Once your training has finished and a good model has been trained then you can deploy your model.
 2. To deploy a model on a single URL image use `python deploy.py --URL [URL_LINK]`
-3. To deploy a model on a folder full of images use `python deploy -image_folder path/to/folder
-4. 3. To deploy a model on a single file use `python deploy -image_file path/to/file
+3. To deploy a model on a folder full of images use `python deploy -image_folder path/to/folder`
+4. To deploy a model on a single file use `python deploy -image_file path/to/file`
 
 Once deployed the model should return the top 5 predictions on each image in a nice string formatted view: e.g.
 
