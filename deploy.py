@@ -9,15 +9,14 @@ import numpy as np
 def load_model(n_outputs=100):
     '''Loads and compiles pre-trained model to be used for real-time predictions'''
     model = m.get_model(n_outputs)
-    model.load_weights("pre_trained_weights/model_weights.hdf5")
+    model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
-def get_data_from_folder(test_image_folder):
+def get_data_from_folder(test_image_folder, mean=None):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
     #dir = os.path.dirname(os.path.abspath(__file__))
     images = []
-    mean = np.load("mean.npy")
     for subdir, dir, files in os.walk(test_image_folder):
         for file in files:
              if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
@@ -25,21 +24,25 @@ def get_data_from_folder(test_image_folder):
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
                 if image is not None:
-                    image = image - mean
-                    image = image / 255
                     image = data.resize(image, size=128)
+                    if mean is not None:
+                        image = image - mean
+                    image = image / 255
                     images.append(image)
                     print(len(images))
     return np.array(images)
 
-def get_data_from_file(filepath, size=128):
+def get_data_from_file(filepath, size=128, mean=None):
     '''Get image from file ready to be used with the deep neural network'''
     import data
 
     image = cv2.imread(filepath)
     print(image.shape)
-    image = (image) / 255
     image = data.resize(image, size)
+    if mean is not None:
+        image = image - mean
+    image = (image) / 255
+
     print(image.shape)
 
     return image
@@ -73,6 +76,7 @@ def apply_model(X, model, categories, multi=False):
     return y
 
 if __name__ == '__main__':
+    import h5py
     #If used as script then run example use case
     import sys
     import urllib
@@ -80,6 +84,12 @@ if __name__ == '__main__':
     test_image_folder = ''
     image = False
     folder = False
+    dataset = h5py.File("data.hdf5", "r")
+    n_categories = dataset['n_categories'].value
+    average_image = dataset['mean'][:]
+    print(average_image.shape)
+    #average_image = None
+
     print(sys.argv)
     if sys.argv[1]== "--URL":
         link = sys.argv[2]
@@ -101,20 +111,23 @@ if __name__ == '__main__':
     for key in categories.iterkeys():
         categories_to_strings[categories[key]] = key
 
-    model = load_model(max(categories.iterkeys) + 1) #this should be run once and kept in memory for all predictions
+    model = load_model(n_outputs=n_categories)
+    #this should be run once and kept in memory for all predictions
                          # as re-loading it is very time consuming
 
     print(categories)
     print(categories_to_strings)
     if folder:
-        images = get_data_from_folder(test_image_folder)
+        images = get_data_from_folder(test_image_folder, mean=average_image)
         y = apply_model(images, model, categories_to_strings, multi=True)
         print(len(y))
         for item in y:
-            for i in range(1):
-                print(item[i]+"\n")
+            print("______________________________________________")
+            for i in range(5):
+                print(item[i])
     elif image:
-        images = get_data_from_file(test_image_path)
+        images = get_data_from_file(test_image_path, mean=average_image)
         y = apply_model(images, model, categories_to_strings, multi=False)
-        for i in range(1):
-            print(y[i]+"\n")
+        print("______________________________________________")
+        for i in range(5):
+            print(y[i])

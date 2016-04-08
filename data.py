@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 from keras.utils import np_utils
 import matplotlib.pyplot as p
+import h5py
+from keras.utils.io_utils import HDF5Matrix
 
 
 def extract_data(rootdir=None, size=256):
@@ -33,16 +35,19 @@ def extract_data(rootdir=None, size=256):
                 #print(category)
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
-                if image is not None:
+                try:
                     image = resize(image, size=size)
-                    X.append(image)
-                    y.append(category)
-                print(count)
-                count = count + 1
+                    if image is not None:
+                        X.append(image)
+                        y.append(category)
+                    print(count)
+                    count = count + 1
+                except:
+                    pass
     return X, y
 
 
-def preprocess_data(X, y, save=True, preset=None):
+def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     '''Preprocesses the data that have already been extracted with extract_data() method
        Attributes:
            X: A list containing images of shape (3, width, height)
@@ -65,10 +70,10 @@ def preprocess_data(X, y, save=True, preset=None):
     y_temp = np.array(y_temp)
     X = X.astype(np.float32)
     mean = X.mean(axis=0)  # get mean
-    X = X - X.mean(axis=0)
+    if subtract_mean:
+        X = X - X.mean(axis=0)
     print(y_temp)
     # save mean
-    np.save("data/mean.npy", mean)
 
     # save categories for future use
     pickle.dump(categories, open("categories.p", "wb"))
@@ -79,11 +84,24 @@ def preprocess_data(X, y, save=True, preset=None):
 
     print(X.shape)
     print(y.shape)
-    if save:
-        np.save("data/X.npy", X)
-        np.save("data/y.npy", y)
+    n_samples = y.shape[0]
+    n_categories = len(categories)
 
-    return X, y
+    if save:
+        h5f = h5py.File('data.hdf5', 'w')
+        h5f.create_dataset('X', data=X)
+        h5f.create_dataset('y', data=y)
+        h5f.create_dataset('nb_samples', data=n_samples)
+        h5f.create_dataset('n_categories', data=len(categories))
+        # h5f.create_dataset('categories', data=categories)
+        # categories_encoded = [n.encode("ascii", "ignore") for n in categories]
+        #h5f.create_dataset('categories', (len(categories_encoded),1),'S10', categories_encoded)
+        h5f.create_dataset('mean', data=mean)
+        h5f.close()
+        # np.save("data/X.npy", X)
+        # np.save("data/y.npy", y)
+
+    return X, y, n_samples, len(categories)
 
 
 def get_metadata():
@@ -94,25 +112,61 @@ def get_metadata():
     #line = lines[0]
     #bits = line.split(",")
     #mean = float(bits[-1])
+    # h5f = h5py.File('data.hdf5', 'r')
+    # categories = h5f['categories'].value
     categories = pickle.load(open("categories.p", "rb"))
 
     return categories
 
-def load_data():
+# def load_data():
+#
+#     X = np.load("data/X.npy")
+#     y = np.load("data/y.npy")
+#     X = (X) / (255)
+#     X_res = np.zeros((X.shape[0], X.shape[1], 128, 128))
+#     for i in range(len(X)):
+#         for channel in range(len(X[i])):
+#             X_res[i, channel]= cv2.resize(X[i, channel], dsize=(128, 128))
+#             #p.imshow(X_res[i, channel])
+#             #p.show()
+#     X = np.array(X_res)
+#     return X, y
 
-    X = np.load("data/X.npy")
-    y = np.load("data/y.npy")
-    X = (X) / (255)
-    X_res = np.zeros((X.shape[0], X.shape[1], 128, 128))
-    for i in range(len(X)):
-        for channel in range(len(X[i])):
-            X_res[i, channel]= cv2.resize(X[i, channel], dsize=(128, 128))
-            #p.imshow(X_res[i, channel])
-            #p.show()
-    X = np.array(X_res)
-    return X, y
+def produce_validation_indices(dataset_indx, number_of_samples):
+    np.random.seed(2048)
+    val = np.random.choice(dataset_indx, size=number_of_samples)
+    val = np.sort(val)
+    val = np.unique(val)
+    #print(val)
+    return val.tolist()
 
-def augment_data(X_train, random_angle_max=360, mirroring_probability=0.5):
+
+def produce_train_indices(dataset_indx, number_of_samples, val_indx):
+    dataset_indx = np.delete(dataset_indx, val_indx)
+    np.random.seed(seed=None)
+    train = np.random.choice(dataset_indx, size=number_of_samples)
+    train = np.unique(train)
+    return (np.sort(train)).tolist()
+
+def load_dataset_bit_from_hdf5(train_indices, val_indices, only_train=True):
+
+     if only_train:
+        h5f = h5py.File('data.hdf5','r')
+        X_train = h5f['X'][train_indices]
+        y_train = h5f['y'][train_indices]
+        h5f.close()
+        return X_train, y_train
+     else:
+        h5f = h5py.File('data.hdf5','r')
+        X_train = h5f['X'][train_indices]
+        y_train = h5f['y'][train_indices]
+        X_val = h5f['X'][val_indices]
+        y_val = h5f['y'][val_indices]
+        h5f.close()
+        return X_train, y_train, X_val, y_val
+
+
+def augment_data(X_train, random_angle_max=180, mirroring_probability=0.5):
     for i in range(len(X_train)):
         random_angle = random.randint(0, random_angle_max)
         mirror_decision = random.randint(0, 100)
@@ -143,7 +197,7 @@ def resize(img, size):
     return img
 
 
-def split_data(X, y, split_ratio=0.1):
+def split_data(X, y, split_ratio=0.5):
     ''''''
     random.seed(4096)
     train_idx = []

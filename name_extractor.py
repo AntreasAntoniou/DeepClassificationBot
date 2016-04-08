@@ -57,6 +57,12 @@ def _extract_anime_characters(root):
                 }
                 seen_names.add(name)
 
+def get_folder_names():
+    dir_folder = "/home/ubuntumax/PycharmProjects/ClassificationBot/downloaded_images"
+    import os
+    for subdir, dir, files in os.walk(dir_folder):
+        folder = subdir.split("/")
+        print(folder[-1])
 
 def print_csv(field_items, fileobj=sys.stdout, fields=None):
     writer = csv.writer(codecs.getwriter('utf8')(fileobj))
@@ -78,3 +84,4 @@ if __name__ == "__main__":
     elif args.what == 'characters':
         shows = get_top_n_shows(args.n)
         print_csv(list_characters(shows), fields=['anime_name', 'name'])
+

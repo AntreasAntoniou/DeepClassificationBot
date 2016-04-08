@@ -173,6 +173,7 @@ class GoogleImageExtractor(object):
         file_ext = os.path.splitext(url_link)[1] #use for checking valid pic ext
         temp_filename = pic_prefix_str + file_ext
         temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename )
+        temp_filename_full_path = temp_filename_full_path.replace("+"," ")
         folder_name = temp_filename_full_path.split("/")
         if not os.path.exists(temp_filename_full_path.replace(folder_name[-1], "")):
             os.makedirs(temp_filename_full_path.replace(folder_name[-1], ""))
@@ -229,7 +230,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('csv', nargs='?', type=argparse.FileType('rb'))
-    parser.add_argument('-n', type=int, default=2000)
+    parser.add_argument('-n', type=int, default=350)
     parser.add_argument('--dry-run', action='store_true', default=False)
     args = parser.parse_args()
 
