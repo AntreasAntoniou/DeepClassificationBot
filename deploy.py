@@ -6,9 +6,9 @@ import cv2
 import numpy as np
 
 
-def load_model(n_outputs=100):
+def load_model(input_shape, n_outputs=100):
     '''Loads and compiles pre-trained model to be used for real-time predictions'''
-    model = m.get_model(n_outputs)
+    model = m.get_model(input_size=input_shape, n_outputs=n_outputs)
     model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
@@ -17,6 +17,7 @@ def get_data_from_folder(test_image_folder, mean=None):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
     #dir = os.path.dirname(os.path.abspath(__file__))
     images = []
+    names = []
     for subdir, dir, files in os.walk(test_image_folder):
         for file in files:
              if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
@@ -25,30 +26,32 @@ def get_data_from_folder(test_image_folder, mean=None):
                 image = cv2.imread(filepath)
                 if image is not None:
                     image = data.resize(image, size=128)
+                    names.append(file)
                     if mean is not None:
                         image = image - mean
                     image = image / 255
                     images.append(image)
-                    print(len(images))
-    return np.array(images)
+
+    return np.array(images), names
 
 def get_data_from_file(filepath, size=128, mean=None):
     '''Get image from file ready to be used with the deep neural network'''
     import data
 
     image = cv2.imread(filepath)
-    print(image.shape)
     image = data.resize(image, size)
+
     if mean is not None:
         image = image - mean
+
     image = (image) / 255
+    bits = filepath.split("/")
+    name = bits[-1]
 
-    print(image.shape)
+    return image, name
 
-    return image
-
-def apply_model(X, model, categories, multi=False):
-    '''Apply model and produce top 3 predictions for given images'''
+def apply_model(X, model, categories, multi=False, top_k=3):
+    '''Apply model and produce top k predictions for given images'''
     y = []
     if multi==False:
         X = np.array([X])
@@ -70,7 +73,7 @@ def apply_model(X, model, categories, multi=False):
             for sample in top_n:
                 sample = sample.tolist()
                 sample.reverse()
-                for item in range(5):
+                for item in range(top_k):
                     res.append(str(categories[sample[item]])+": "+str(y_temp[0, sample[item]]))
             y.append(res)
     return y
@@ -87,10 +90,7 @@ if __name__ == '__main__':
     dataset = h5py.File("data.hdf5", "r")
     n_categories = dataset['n_categories'].value
     average_image = dataset['mean'][:]
-    print(average_image.shape)
-    #average_image = None
 
-    print(sys.argv)
     if sys.argv[1]== "--URL":
         link = sys.argv[2]
         bits = link.split("/")
@@ -104,30 +104,34 @@ if __name__ == '__main__':
         test_image_folder = sys.argv[2]
         folder = True
 
-
-    categories = data.get_metadata()
+    categories = data.get_categories()
     categories_to_strings = dict()
 
     for key in categories.iterkeys():
         categories_to_strings[categories[key]] = key
 
-    model = load_model(n_outputs=n_categories)
+    model = load_model(input_shape=128, n_outputs=n_categories)
     #this should be run once and kept in memory for all predictions
                          # as re-loading it is very time consuming
 
-    print(categories)
-    print(categories_to_strings)
     if folder:
-        images = get_data_from_folder(test_image_folder, mean=average_image)
+        images, names = get_data_from_folder(test_image_folder, mean=average_image)
         y = apply_model(images, model, categories_to_strings, multi=True)
         print(len(y))
-        for item in y:
+        for i in range(len(y)):
+            item = y[i]
             print("______________________________________________")
-            for i in range(5):
-                print(item[i])
+            print("Image Name: {}".format(str(names[i])))
+            print(" Categories: ")
+            for j in range(5):
+                print("{0}. {1}".format(j+1, item[j]*100))
+            print("______________________________________________")
     elif image:
-        images = get_data_from_file(test_image_path, mean=average_image)
+        images, name = get_data_from_file(test_image_path, mean=average_image)
         y = apply_model(images, model, categories_to_strings, multi=False)
-        print("______________________________________________")
+        print("_________________________________________________")
+        print("Image Name: {}".format(name))
+        print("Categories: ")
         for i in range(5):
-            print(y[i])
+            print("{0}. {1}".format(i+1, y[i]))
+        print("_________________________________________________")

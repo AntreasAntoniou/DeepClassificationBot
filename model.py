@@ -10,14 +10,14 @@ from keras.regularizers import l2
 from keras import backend as K
 
 
-def get_model(n_outputs=1000):
+def get_model(n_outputs=1000, input_size=128):
     '''Builds a Deep Convolutional Neural Network of architecture VGG-Net as described in
        paper http://arxiv.org/pdf/1409.1556.pdf
        Returns the model ready for compilation and training or predictions
     '''
     conv = Sequential()
 
-    conv.add(Convolution2D(64, 3, 3, activation='relu', input_shape=(3, 128, 128)))
+    conv.add(Convolution2D(64, 3, 3, activation='relu', input_shape=(3, input_size, input_size)))
     conv.add(ZeroPadding2D((1, 1)))
     conv.add(Convolution2D(64, 3, 3, activation='relu'))
     conv.add(MaxPooling2D((2, 2), strides=(2, 2)))

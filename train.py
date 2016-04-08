@@ -24,35 +24,35 @@ def get_top_n_error(preds, y, n):
 
     return accuracy
 
-def run(epochs=500, split=0.1, extract=True, cont=True):
+def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True):
     '''Does the routine required to get the data, put them in needed format and start training the model
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
     if extract:
         print("Extracting data..")
         X, y = data.extract_data(size=128)
 
-        print("Getting data into shape..")
+        print("Preprocessing data..")
         X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
 
     else:
+        print("Loading data..")
         h5f = h5py.File('data.hdf5', 'r')
         nb_samples = h5f['nb_samples'].value
-        #print(nb_samples)
         num_categories = h5f['n_categories'].value
         h5f.close()
-        #
 
-    print("Loading data..")
-    print(num_categories)
-    print(nb_samples)
+    print("Number of categories: {}".format(num_categories))
+    print("Number of samples {}".format(nb_samples))
+
     data_ids = np.arange(start=0, stop=nb_samples)
-    val_ids = data.produce_validation_indices(data_ids, 4000)
-    train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=7500, val_indx=val_ids)
+    val_ids = data.produce_validation_indices(data_ids, nb_samples*validation_percentage)
+    train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=nb_samples*training_percentage, val_indx=val_ids)
     #X_train, y_train, X_test, y_test = data.split_data(X, y, split_ratio=split)
     X_train, y_train, X_val, y_val = data.load_dataset_bit_from_hdf5(train_ids, val_ids, only_train=False)
     X_val = X_val / 255
+
     print("Building and Compiling model..")
-    model = m.get_model(n_outputs=num_categories)
+    model = m.get_model(n_outputs=num_categories, input_size=128)
 
     if cont:
         #model.load_weights_until_layer("pre_trained_weights/latest_model_weights.hdf5", 26)
@@ -63,16 +63,9 @@ def run(epochs=500, split=0.1, extract=True, cont=True):
 
     best_performance = np.inf
     for i in range(epochs):
-        # X_train_augmented = data.augment_data(X_train.copy())
-        # metadata = model.fit(X=X_train_augmented, y=y_train, batch_size=64, nb_epoch=1, verbose=1,
-        #                      validation_data=[X_test, y_test], show_accuracy=True)
-
-        # compute quantities required for featurewise normalization
-        # (std, mean, and principal components if ZCA whitening is applied)
         train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=15000, val_indx=val_ids)
 
         X_train, y_train = data.load_dataset_bit_from_hdf5(train_ids, val_ids, only_train=True)
-        import matplotlib.pyplot as p
 
         X_train = X_train / 255
         X_train = data.augment_data(X_train)
