@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-import collections
 import requests
 import name_extractor
+import mocks
 
 
 def test_top_n_shows(monkeypatch):
@@ -11,7 +11,7 @@ def test_top_n_shows(monkeypatch):
                 {'id': '10216', 'name': 'Fullmetal Alchemist: Brotherhood'}]),
             (no_shows, []),
     ]:
-        monkeypatch.setattr(requests, 'get', mock_get(report))
+        monkeypatch.setattr(requests, 'get', mocks.mock_get(report))
         shows = name_extractor.get_top_n_shows(100)
         assert shows['items'] == expected
 
@@ -24,22 +24,13 @@ def test_list_characters(monkeypatch):
             ]),
             (no_details, [])
     ]:
-        monkeypatch.setattr(requests, 'get', mock_get(xml))
+        monkeypatch.setattr(requests, 'get', mocks.mock_get(xml))
         shows = {
             'fields': ['show'],
             'items': [{'id': '11770'}, {'id': '10216'}],
         }
         characters = name_extractor.list_characters(shows)['items']
         assert list(characters) == expected
-
-
-def mock_get(content):
-    def _mock_get(*args, **kwargs):
-        return MockResponse(content)
-    return _mock_get
-
-
-MockResponse = collections.namedtuple('Response', 'content')
 
 
 two_shows = '''
