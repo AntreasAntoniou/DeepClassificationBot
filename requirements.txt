@@ -1,9 +1,12 @@
 backports.csv==1.0.1
+ConfigArgParse==0.10.0
 keras
+ndg-httpsclient==0.4.0
 numpy
 pandas
 pattern
 requests==2.9.1
 selenium
 theano
+tweepy==3.5.0
 wsgiref==0.1.2
