@@ -1,4 +1,6 @@
-from keras.models import Sequential
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 import model as m
 import os
 import data
@@ -19,15 +21,15 @@ def load_model(input_shape, n_outputs=100):
     return model
 
 
+
 def get_data_from_folder(test_image_folder, mean=None, size=256):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
-    #dir = os.path.dirname(os.path.abspath(__file__))
+    # dir = os.path.dirname(os.path.abspath(__file__))
     images = []
     names = []
     for subdir, dir, files in os.walk(test_image_folder):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
-                bits = subdir.split("/")
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
                 if image is not None:
@@ -39,6 +41,7 @@ def get_data_from_folder(test_image_folder, mean=None, size=256):
                     images.append(image)
 
     return np.array(images), names
+
 
 
 def get_data_from_file(filepath, size=256, mean=None):
@@ -70,7 +73,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
             sample = sample.tolist()
             sample.reverse()
             for item in sample:
-                res.append(str(categories[item])+": "+str(y_temp[0, item]))
+                res.append(str(categories[item]) + ": " + str(y_temp[0, item]))
         return res
     else:
         for image in X:
@@ -82,13 +85,14 @@ def apply_model(X, model, categories, multi=False, top_k=3):
                 sample = sample.tolist()
                 sample.reverse()
                 for item in range(top_k):
-                    res.append(str(categories[sample[item]])+": "+str(y_temp[0, sample[item]]))
+                    res.append(str(categories[sample[item]]) + ": " + str(y_temp[0, sample[item]]))
             y.append(res)
     return y
 
+
 if __name__ == '__main__':
     import h5py
-    #If used as script then run example use case
+    # If used as script then run example use case
     import sys
     import urllib
     image_size = 128 #change this to match your image size
@@ -103,7 +107,7 @@ if __name__ == '__main__':
     if sys.argv[1] == "--URL":
         link = sys.argv[2]
         bits = link.split("/")
-        test_image_path = "downloaded_images/"+str(bits[-1])
+        test_image_path = "downloaded_images/" + str(bits[-1])
         urllib.urlretrieve(link, test_image_path)
         image = True
     elif sys.argv[1] == "--image_path":
@@ -120,8 +124,8 @@ if __name__ == '__main__':
         categories_to_strings[categories[key]] = key
 
     model = load_model(input_shape=image_size, n_outputs=n_categories)
-    #this should be run once and kept in memory for all predictions
-                         # as re-loading it is very time consuming
+    # this should be run once and kept in memory for all predictions
+    # as re-loading it is very time consuming
 
     if folder:
         images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
@@ -133,7 +137,7 @@ if __name__ == '__main__':
             print("Image Name: {}".format(str(names[i])))
             print(" Categories: ")
             for j in range(5):
-                print("{0}. {1}".format(j+1, item[j]*100))
+                print("{0}. {1}".format(j + 1, item[j] * 100))
             print("______________________________________________")
     elif image:
         images, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
@@ -142,5 +146,5 @@ if __name__ == '__main__':
         print("Image Name: {}".format(name))
         print("Categories: ")
         for i in range(5):
-            print("{0}. {1}".format(i+1, y[i]))
+            print("{0}. {1}".format(i + 1, y[i]))
         print("_________________________________________________")

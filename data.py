@@ -1,12 +1,15 @@
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 import pickle
 import random
 import os
 import cv2
 import numpy as np
 from keras.utils import np_utils
-import matplotlib.pyplot as p
 import h5py
 from keras.utils.io_utils import HDF5Matrix
+
 '''This module provides all the methods needed for data extraction, preprocessing, storing and retrieval.
    A deep neural network is nothing but a bunch of random parameters without massive amounts of high quality data
    to train it on, and as such a large percentage of project time was spent building the data.py methods. Our main
@@ -66,8 +69,9 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     for label in y:  # get all the unique categories
         categories.add(label)
 
-    categories = dict(zip(categories, range(len(categories))))  # build a dictionary that maps categories in string form
-                                                                # to a unique id
+    # build a dictionary that maps categories in string form to a unique id
+    categories = dict(zip(categories, list(range(len(categories)))))
+
     y_temp = []
     for label in y:  # encode y with the unique ids
         y_temp.append(categories[label])
@@ -104,8 +108,8 @@ def get_categories():
     '''Load categories names'''
 
     categories = pickle.load(open("data/categories.p", "rb"))
-
     return categories
+
 
 def produce_train_indices(dataset_indx, number_of_samples, val_indx):
     dataset_indx = np.delete(dataset_indx, val_indx)
@@ -113,6 +117,7 @@ def produce_train_indices(dataset_indx, number_of_samples, val_indx):
     train = np.random.choice(dataset_indx, size=number_of_samples)
     train = np.unique(train)
     return (np.sort(train)).tolist()
+
 
 def produce_validation_indices(dataset_indx, number_of_samples):
     np.random.seed(2048)
@@ -123,14 +128,13 @@ def produce_validation_indices(dataset_indx, number_of_samples):
 
 
 def load_dataset_bit_from_hdf5(train_indices, val_indices, only_train=True):
-
-     if only_train:
+    if only_train:
         h5f = h5py.File('data.hdf5','r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         h5f.close()
         return X_train, y_train
-     else:
+    else:
         h5f = h5py.File('data.hdf5','r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
@@ -147,10 +151,10 @@ def augment_data(X_train, random_angle_max=180, mirroring_probability=0.5):
         mirror_decision = random.randint(0, 100)
         flip_orientation = random.randint(0, 1)
         for channel in range(len(X_train[i])):
-            rows,cols = X_train[i, channel].shape
-            M = cv2.getRotationMatrix2D((cols/2,rows/2),random_angle,1)
-            rotated_image = cv2.warpAffine(X_train[i, channel],M,(cols,rows))
-            if mirror_decision<mirroring_probability*100:
+            rows, cols = X_train[i, channel].shape
+            M = cv2.getRotationMatrix2D((cols // 2, rows // 2), random_angle, 1)
+            rotated_image = cv2.warpAffine(X_train[i, channel], M, (cols, rows))
+            if mirror_decision < mirroring_probability * 100:
                 X_train[i, channel] = cv2.flip(rotated_image, flipCode=flip_orientation)
             else:
                 X_train[i, channel] = rotated_image
@@ -176,7 +180,7 @@ def split_data(X, y, split_ratio=0.5):
     test_idx = []
     for i in range(X.shape[0]):
         decision = random.randint(0, 99)
-        if decision < (100-(split_ratio*100)):
+        if decision < (100 - (split_ratio * 100)):
             train_idx.append(i)
         else:
             test_idx.append(i)

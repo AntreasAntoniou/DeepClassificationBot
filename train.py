@@ -1,12 +1,14 @@
-import h5py
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
-from keras.models import Sequential
-from keras.preprocessing.image import ImageDataGenerator
+import h5py
 
 import data
 import numpy as np
 import model as m
 import argparse
+
 
 '''
 This module provides all the methods needed to train and validation test a deep neural network. Training includes:
@@ -31,21 +33,22 @@ running.
 '''
 
 
+
 def get_top_n_error(preds, y, n):
     index_of_true = np.argmax(y, axis=1)
     index_of_preds = np.argsort(preds, axis=1)
-    total = float(len(y))
-    correct = float(0)
+    correct = 0
 
     for i in range(len(index_of_true)):
-        for j in range(1, n+1):
+        for j in range(1, n + 1):
             if index_of_true[i] == index_of_preds[i, -j]:
-                correct = correct+1
+                correct = correct + 1
                 break
 
-    accuracy = float(correct/total)
-
+    total = len(y)
+    accuracy = correct / total
     return accuracy
+
 
 
 def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True, size=256, top_k=5):
@@ -102,16 +105,17 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         current_loss = metadata.history['loss'][-1]
         current_val_loss = metadata.history['val_loss'][-1]
         preds = model.predict_proba(X_val, batch_size=64)
-        print("Loss: "+str(current_loss))
-        print("Val_loss: "+str(current_val_loss))
+        print("Loss: " + str(current_loss))
+        print("Val_loss: " + str(current_val_loss))
 
         top_3_error = get_top_n_error(preds, y_val, top_k)
         print("Top 3 error: "+str(top_3_error))
-        if current_val_loss<best_performance:
+        if current_val_loss < best_performance:
             model.save_weights("pre_trained_weights/model_weights.hdf5", overwrite=True)
-            best_performance=current_val_loss
+            best_performance = current_val_loss
             print("Saving weights..")
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
+
 
 
 def extract_data(size=256):
@@ -122,6 +126,7 @@ def extract_data(size=256):
     X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
 
     return X, y, nb_samples, num_categories
+
 
 if __name__ == '__main__':
     import argparse

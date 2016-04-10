@@ -1,21 +1,18 @@
-import re, os, sys, datetime, time
+from __future__ import absolute_import
+from __future__ import print_function
+import os
+import time
+import re
 import socket
-
-import pandas
 from selenium import webdriver
-from contextlib import closing
-from selenium.webdriver import Firefox
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
+from pattern.web import URL, DOM
 
-from pattern.web import URL, extension, cache, plaintext, Newsfeed, DOM
 
 '''Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader adapted for our project
     Special thanks to shuvronewscred for his project'''
 
-class GoogleImageExtractor(object):
 
+class GoogleImageExtractor(object):
     def __init__(self, search_key=''):
         """ Google image search class
             Args:
@@ -23,29 +20,29 @@ class GoogleImageExtractor(object):
 
         """
         if type(search_key) == str:
-            ## convert to list even for one search keyword to standalize the pulling.
+            # convert to list even for one search keyword to standalize the pulling.
             self.g_search_key_list = [search_key]
         elif type(search_key) == list:
             self.g_search_key_list = search_key
         else:
-            print 'google_search_keyword not of type str or list'
+            print('google_search_keyword not of type str or list')
             raise
 
         self.g_search_key = ''
 
-        ## user options
+        # user options
         self.image_dl_per_search = 200
 
-        ## url construct string text
+        # url construct string text
         self.prefix_of_search_url = "https://www.google.com.sg/search?q="
-        self.postfix_of_search_url = '&source=lnms&tbm=isch&sa=X&ei=0eZEVbj3IJG5uATalICQAQ&ved=0CAcQ_AUoAQ&biw=939&bih=591'# non changable text
+        self.postfix_of_search_url = '&source=lnms&tbm=isch&sa=X&ei=0eZEVbj3IJG5uATalICQAQ&ved=0CAcQ_AUoAQ&biw=939&bih=591'  # non changable text
         self.target_url_str = ''
 
-        ## storage
+        # storage
         self.pic_url_list = []
         self.pic_info_list = []
 
-        ## file and folder path
+        # file and folder path
         self.folder_main_dir_prefix = 'downloaded_images/'
 
     def reformat_search_for_spaces(self):
@@ -73,7 +70,7 @@ class GoogleImageExtractor(object):
             Args:
                 filename (str): full file path
         """
-        with open(filename,'r') as f:
+        with open(filename, 'r') as f:
             self.g_search_key_list = f.readlines()
 
     def set_searchlist(self, search_list):
@@ -90,8 +87,8 @@ class GoogleImageExtractor(object):
             Set to self.sp_search_url_list
         '''
         self.reformat_search_for_spaces()
-        self.target_url_str = self.prefix_of_search_url + self.g_search_key +\
-                                self.postfix_of_search_url
+        self.target_url_str = self.prefix_of_search_url + self.g_search_key + \
+            self.postfix_of_search_url
 
     def retrieve_source_fr_html(self, driver):
         """ Make use of selenium. Retrieve from html table using pandas table.
@@ -101,28 +98,26 @@ class GoogleImageExtractor(object):
             driver.get(self.target_url_str)
         except:
             print("Connection refused")
-        ## wait for log in then get the page source.
+        # wait for log in then get the page source.
         try:
             driver.execute_script("window.scrollTo(0, 30000)")
             time.sleep(2)
             self.temp_page_source = driver.page_source
-            #driver.find_element_by_css_selector('ksb _kvc').click()#cant find the class
-            driver.find_element_by_id('smb').click() #ok
+            # driver.find_element_by_css_selector('ksb _kvc').click()  # cant find the class
+            driver.find_element_by_id('smb').click()  # ok
             time.sleep(2)
             driver.execute_script("window.scrollTo(0, 60000)")
             time.sleep(2)
             driver.execute_script("window.scrollTo(0, 60000)")
 
         except:
-            print 'not able to find'
-            #driver.quit()
+            print('not able to find')
+            # driver.quit()
 
         try:
             self.page_source = driver.page_source
         except socket.error:
             print("Socket broke")
-
-
 
     def extract_pic_url(self):
         """ extract all the raw pic url in list
@@ -136,7 +131,7 @@ class GoogleImageExtractor(object):
             try:
                 self.pic_url_list.append(tar_str.group(1))
             except:
-                print 'error parsing', tag
+                print('error parsing', tag)
 
     def multi_search_download(self):
         """ Mutli search download"""
@@ -151,20 +146,20 @@ class GoogleImageExtractor(object):
 
             self.retrieve_source_fr_html(driver)
             self.extract_pic_url()
-            self.downloading_all_photos() #some download might not be jpg?? use selnium to download??
+            self.downloading_all_photos()  # some download might not be jpg?? use selnium to download??
             self.save_infolist_to_file()
         driver.close()
+
     def downloading_all_photos(self):
         """ download all photos to particular folder
-
         """
         self.create_folder()
         pic_counter = 1
         for url_link in self.pic_url_list:
-            print pic_counter
-            pic_prefix_str = self.g_search_key +"/"+ self.g_search_key + str(pic_counter)
+            print(pic_counter)
+            pic_prefix_str = self.g_search_key + "/" + self.g_search_key + str(pic_counter)
             self.download_single_image(url_link.encode(), pic_prefix_str)
-            pic_counter = pic_counter +1
+            pic_counter = pic_counter + 1
 
     def download_single_image(self, url_link, pic_prefix_str):
         """ Download data according to the url link given.
@@ -173,35 +168,35 @@ class GoogleImageExtractor(object):
                 pic_prefix_str (str): pic_prefix_str for unique label the pic
         """
         self.download_fault = 0
-        file_ext = os.path.splitext(url_link)[1] #use for checking valid pic ext
+        file_ext = os.path.splitext(url_link)[1]  # use for checking valid pic ext
         temp_filename = pic_prefix_str + file_ext
-        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename )
-        temp_filename_full_path = temp_filename_full_path.replace("+"," ")
+        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, temp_filename)
+        temp_filename_full_path = temp_filename_full_path.replace("+", " ")
         folder_name = temp_filename_full_path.split("/")
         if not os.path.exists(temp_filename_full_path.replace(folder_name[-1], "")):
             os.makedirs(temp_filename_full_path.replace(folder_name[-1], ""))
-        valid_image_ext_list = ['.png','.jpg','.jpeg', '.gif', '.bmp', '.tiff'] #not comprehensive
+        valid_image_ext_list = ['.png', '.jpg', '.jpeg', '.gif', '.bmp', '.tiff']  # not comprehensive
 
-        url = URL(url_link.replace("%2F","/").replace("%3A",":"))
+        url = URL(url_link.replace("%2F", "/").replace("%3A", ":"))
         try:
             if url.redirect:
-                return  #if there is re-direct, return
+                return  # if there is re-direct, return
             if file_ext not in valid_image_ext_list:
-                return  #return if not valid image extension
+                return  # return if not valid image extension
 
-            f = open(temp_filename_full_path, 'wb') # save as test.gif
-            print url_link
-            self.pic_info_list.append(pic_prefix_str + ': ' + url_link )
+            f = open(temp_filename_full_path, 'wb')  # save as test.gif
+            print(url_link)
+            self.pic_info_list.append(pic_prefix_str + ': ' + url_link)
 
             image = url.download()
-            import matplotlib.pyplot as p
-            #p.imshow(image)
-            #p.show(image)
-            f.write(image)#if have problem skip
+            # import matplotlib.pyplot as p
+            # p.imshow(image)
+            # p.show(image)
+            f.write(image)  # if have problem skip
 
-            #if self.__print_download_fault:
-            print 'Problem with processing this data: ', url_link
-            self.download_fault =1
+            # if self.__print_download_fault:
+            print('Problem with processing this data: ', url_link)
+            self.download_fault = 1
             f.close()
         except:
             pass
@@ -219,8 +214,8 @@ class GoogleImageExtractor(object):
         """ Save the info list to file.
 
         """
-        temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt' )
-
+        pass
+        # temp_filename_full_path = os.path.join(self.gs_raw_dirpath, self.g_search_key + '_info.txt')
         # with  open(temp_filename_full_path, 'w') as f:
         #     for n in self.pic_info_list:
         #         f.write(n)
@@ -238,11 +233,11 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     csv_input = codecs.getreader('utf8')(args.csv)
-    queries = map(lambda row: ' '.join(row.values()), csv.DictReader(csv_input))
+    queries = [' '.join(row.values()) for row in csv.DictReader(csv_input)]
 
-    w = GoogleImageExtractor('')#leave blanks if get the search list from file
+    w = GoogleImageExtractor('')  # leave blanks if get the search list from file
     w.set_num_image_to_dl(args.n)
-    w.set_searchlist(queries)#replace the searclist
+    w.set_searchlist(queries)  # replace the searclist
 
     if not args.dry_run:
         w.multi_search_download()
