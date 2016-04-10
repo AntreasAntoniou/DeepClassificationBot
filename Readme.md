@@ -14,7 +14,7 @@ Make sure you have a GPU as the training is very compute intensive
 5. Install Python dependencies
 
 ```
-$ virtualenv --python=python2 env
+$ virtualenv --python=python2 --system-site-packages env
 $ . env/bin/activate
 $ pip install -r requirements.txt
 ```
