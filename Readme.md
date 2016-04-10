@@ -2,7 +2,7 @@
 ----------------------
 Welcome to the Classification Bot codebase. Classification Bot is an attempt of simplifying the collection, extraction and preprocessing of data as well as providing an end to end pipeline for using them to train large deep neural networks.
 
-The system is composed of scrapers, data_extractors, preprocessors, deep neural network models using Keras and an easy to use deployment module.
+The system is composed of scrapers, data_extractors, preprocessors, deep neural network models using [Keras](https://github.com/fchollet/keras) provided by [Francois Chollet](https://github.com/fchollet)  and an easy to use deployment module.
 
 **To Install**
 Make sure you have a GPU as the training is very compute intensive
@@ -70,3 +70,11 @@ Things to try:
 
 1. Create your own classifiers
 2. Try different model architectures (Hint: go to google scholar or arxiv and search for GoogLeNet, VGG-Net, AlexNet, ResNet and follow the waves :) )
+
+
+**Special Thanks**
+Special thanks to Francois Chollet (fchollet) for building the superb [Keras](https://github.com/fchollet/keras) deep learning library.
+We couldn't have brought a project ready to be used by non-machine learning people if it wasn't for the ease of use of Keras.
+
+Special thanks to https://github.com/shuvronewscred/ for building the image scraper we adapted for our project.
+Original source code can be found at https://github.com/shuvronewscred/google-search-image-downloader
