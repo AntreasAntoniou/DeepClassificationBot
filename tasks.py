@@ -2,6 +2,8 @@
 '''
 Bot deployment tasks
 '''
+from __future__ import absolute_import
+
 import subprocess
 
 from configargparse import ConfigFileParser
@@ -25,10 +27,10 @@ def create_instance(name, zone, config):
     args = [
         'gcloud', 'compute', 'instances', 'create', name,
         '--image', 'container-vm',
-	'--zone', zone,
+        '--zone', zone,
         '--machine-type', 'f1-micro',
         '--metadata-from-file', 'google-container-manifest=etc/containers.yaml',
-        ]
+    ]
     with open(config) as f:
         bot_config = ConfigFileParser().parse(f)
     if len(bot_config):
@@ -51,8 +53,8 @@ def create_instance(name, zone, config):
 def delete_instance(name, zone):
     args = [
         'gcloud', 'compute', 'instances', 'delete', name,
-	'--zone', zone,
-        ]
+        '--zone', zone,
+    ]
     subprocess.call(args)
 
 

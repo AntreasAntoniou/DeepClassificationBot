@@ -4,6 +4,7 @@ Twitter bot who replies with the best guesses of
 what a @mention'ed image is.
 '''
 from __future__ import absolute_import
+from __future__ import print_function
 from __future__ import division
 
 import time
@@ -14,8 +15,6 @@ import urllib
 from multiprocessing import TimeoutError
 import multiprocessing.pool
 
-import requests
-import numpy as np
 import cv2
 import h5py
 import tweepy
@@ -131,7 +130,7 @@ class Messages(object):
         if len(y):
             output = "\nProbable Anime: \n"
             for i in range(3):
-                output += "{}. {}\n".format(i+1, y[i])
+                output += "{}. {}\n".format(i + 1, y[i])
             return output
         else:
             return cls.unknown_image()
@@ -241,7 +240,7 @@ def url_from_entities(entities):
 @timeout(30)
 def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
     bits = url.split("/")
-    test_image_path = "downloaded_images/"+str(bits[-1])
+    test_image_path = "downloaded_images/" + str(bits[-1])
     urllib.urlretrieve(url, test_image_path)
     image = cv2.imread(test_image_path)
     return image
