@@ -7,14 +7,17 @@ The system is composed of scrapers, data_extractors, preprocessors, deep neural 
 **To Install**
 Make sure you have a GPU as the training is very compute intensive
 
-1. Install CUDA_toolkit 7.5
-2. Install cuDNN 4
-3. Install theano, using `sudo pip install git+git://github.com/Theano/Theano.git`
-4. Make sure you have Python 2.7.6 and virtualenv installed on your system
-5. Install Python dependencies
+1. (OSX) Install gcc: `brew install gcc`
+2. Install CUDA_toolkit 7.5
+3. Install cuDNN 4
+4. Install Theano, using `sudo pip install git+git://github.com/Theano/Theano.git`
+5. Install OpenCV
+6. Install hdf5 library (libhdf5-dev)
+7. Make sure you have Python 2.7.6 and virtualenv installed on your system
+8. Install Python dependencies
 
 ```
-$ virtualenv --python=python2 env
+$ virtualenv --python=python2 --system-site-packages env
 $ . env/bin/activate
 $ pip install -r requirements.txt
 ```
