@@ -4,6 +4,11 @@ import os
 import data
 import cv2
 import numpy as np
+'''
+This module provides all the methods needed to succesfully deploy a model. We provide methods for URL based, file based
+and folder based deployment. Allowing you to choose one to mix and match with your own project's needs. The main method
+shows a use case of the deploy.py module, and also has argument parsing which allows you to quickly test your models.
+'''
 
 
 def load_model(input_shape, n_outputs=100):
@@ -13,19 +18,20 @@ def load_model(input_shape, n_outputs=100):
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
 
-def get_data_from_folder(test_image_folder, mean=None):
+
+def get_data_from_folder(test_image_folder, mean=None, size=256):
     '''Extracts images from image folder and gets them ready for use with the deep neural network'''
     #dir = os.path.dirname(os.path.abspath(__file__))
     images = []
     names = []
     for subdir, dir, files in os.walk(test_image_folder):
         for file in files:
-             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
+            if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
                 bits = subdir.split("/")
                 filepath = os.path.join(subdir, file)
                 image = cv2.imread(filepath)
                 if image is not None:
-                    image = data.resize(image, size=128)
+                    image = data.resize(image, size=size)
                     names.append(file)
                     if mean is not None:
                         image = image - mean
@@ -34,7 +40,8 @@ def get_data_from_folder(test_image_folder, mean=None):
 
     return np.array(images), names
 
-def get_data_from_file(filepath, size=128, mean=None):
+
+def get_data_from_file(filepath, size=256, mean=None):
     '''Get image from file ready to be used with the deep neural network'''
     import data
 
@@ -50,10 +57,11 @@ def get_data_from_file(filepath, size=128, mean=None):
 
     return image, name
 
+
 def apply_model(X, model, categories, multi=False, top_k=3):
     '''Apply model and produce top k predictions for given images'''
     y = []
-    if multi==False:
+    if not multi:
         X = np.array([X])
         y_temp = model.predict_proba(X=X, batch_size=1)
         top_n = y_temp.argsort()
@@ -64,7 +72,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
             for item in sample:
                 res.append(str(categories[item])+": "+str(y_temp[0, item]))
         return res
-    elif multi:
+    else:
         for image in X:
             image = np.array([image])
             y_temp = model.predict_proba(X=image, batch_size=1)
@@ -83,6 +91,7 @@ if __name__ == '__main__':
     #If used as script then run example use case
     import sys
     import urllib
+    image_size = 128 #change this to match your image size
     test_image_path = ''
     test_image_folder = ''
     image = False
@@ -91,12 +100,12 @@ if __name__ == '__main__':
     n_categories = dataset['n_categories'].value
     average_image = dataset['mean'][:]
 
-    if sys.argv[1]== "--URL":
+    if sys.argv[1] == "--URL":
         link = sys.argv[2]
         bits = link.split("/")
         test_image_path = "downloaded_images/"+str(bits[-1])
         urllib.urlretrieve(link, test_image_path)
-        image=True
+        image = True
     elif sys.argv[1] == "--image_path":
         test_image_path = str(sys.argv[2])
         image = True
@@ -110,12 +119,12 @@ if __name__ == '__main__':
     for key in categories.iterkeys():
         categories_to_strings[categories[key]] = key
 
-    model = load_model(input_shape=128, n_outputs=n_categories)
+    model = load_model(input_shape=image_size, n_outputs=n_categories)
     #this should be run once and kept in memory for all predictions
                          # as re-loading it is very time consuming
 
     if folder:
-        images, names = get_data_from_folder(test_image_folder, mean=average_image)
+        images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
         y = apply_model(images, model, categories_to_strings, multi=True)
         print(len(y))
         for i in range(len(y)):
@@ -127,7 +136,7 @@ if __name__ == '__main__':
                 print("{0}. {1}".format(j+1, item[j]*100))
             print("______________________________________________")
     elif image:
-        images, name = get_data_from_file(test_image_path, mean=average_image)
+        images, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
         y = apply_model(images, model, categories_to_strings, multi=False)
         print("_________________________________________________")
         print("Image Name: {}".format(name))

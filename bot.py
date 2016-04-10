@@ -23,7 +23,7 @@ import data
 import deploy
 
 
-INPUT_SHAPE = 128
+INPUT_SHAPE = 128  # change it to your input image size
 logging.basicConfig()
 logger = logging.getLogger('bot')
 logger.setLevel(logging.INFO)
@@ -144,7 +144,7 @@ class DMMessages(Messages):
     def give_me_an_image():
         return at_random(
             'Give me an image URL',
-            "I don't see an image. Message me an image URL",
+            "I don't see an image. Message me an image URL please",
         )
 
 

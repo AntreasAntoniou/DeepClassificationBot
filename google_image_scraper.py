@@ -11,6 +11,9 @@ from selenium.webdriver.support import expected_conditions as EC
 
 from pattern.web import URL, extension, cache, plaintext, Newsfeed, DOM
 
+'''Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader adapted for our project
+    Special thanks to shuvronewscred for his project'''
+
 class GoogleImageExtractor(object):
 
     def __init__(self, search_key=''):
