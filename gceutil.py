@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 '''
+Utils for working in a GCE environment.
 
+`detect_gce_environment` courtesy of:
 https://github.com/google/oauth2client/blob/8f4d9164d98b23f3cac0f0785312a50ef22899e4/oauth2client/client.py
 '''
+import missing `from __future__ import absolute_import
+
 import socket
 
 import six
