@@ -24,11 +24,16 @@ def get_top_n_error(preds, y, n):
 
     return accuracy
 
+<<<<<<< HEAD
 def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True):
+=======
+def run(epochs=500, split=0.1, extract=True, cont=True, size=128):
+>>>>>>> checkout
     '''Does the routine required to get the data, put them in needed format and start training the model
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
     if extract:
         print("Extracting data..")
+<<<<<<< HEAD
         X, y = data.extract_data(size=128)
 
         print("Preprocessing data..")
@@ -40,6 +45,9 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         nb_samples = h5f['nb_samples'].value
         num_categories = h5f['n_categories'].value
         h5f.close()
+=======
+        X, y = data.extract_data(size)
+>>>>>>> checkout
 
     print("Number of categories: {}".format(num_categories))
     print("Number of samples {}".format(nb_samples))
