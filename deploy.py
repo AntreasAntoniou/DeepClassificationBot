@@ -60,7 +60,6 @@ def get_data_from_file(filepath, size=256, mean=None):
 
     return image, name
 
-
 def apply_model(X, model, categories, multi=False, top_k=3):
     '''Apply model and produce top k predictions for given images'''
     y = []
@@ -73,7 +72,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
             sample = sample.tolist()
             sample.reverse()
             for item in sample:
-                res.append(str(categories[item]) + ": " + str(y_temp[0, item]))
+                res.append("{category}: {probability:.2%}".format(category=categories[item], probability=y_temp[0, item]))
         return res
     else:
         for image in X:

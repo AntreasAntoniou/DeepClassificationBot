@@ -10,6 +10,7 @@ import time
 import random
 import functools
 import logging
+import urllib
 from multiprocessing import TimeoutError
 import multiprocessing.pool
 
@@ -88,7 +89,9 @@ class ImageClassifier(object):
         self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
 
     def classify(self, cvimage):
+        print(cvimage.shape)
         normalized = normalize_cvimage(cvimage, mean=self.average_image)
+        print("Normalized image")
         return deploy.apply_model(normalized, self.model, self.category_to_catnames, multi=False)
 
 
@@ -126,7 +129,10 @@ class Messages(object):
     @classmethod
     def my_guess(cls, y):
         if len(y):
-            return y[0]
+            output = "\nProbable Anime: \n"
+            for i in range(3):
+                output += "{}. {}\n".format(i+1, y[i])
+            return output
         else:
             return cls.unknown_image()
 
@@ -193,6 +199,7 @@ class ReplyToTweet(tweepy.StreamListener):
 
         try:
             cvimage = fetch_cvimage_from_url(maybe_image_url)
+            print("Got image")
         except TimeoutError:
             logger.debug("{0} timed out while fetching {1}".format(status_id, maybe_image_url))
             return messages.took_too_long()
@@ -233,25 +240,20 @@ def url_from_entities(entities):
 
 @timeout(30)
 def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
-    r = requests.get(url, timeout=5, stream=True)
-
-    content = ''
-    for chunk in r.iter_content(2048):
-        content += chunk
-        if len(content) > maxsize:
-            r.close()
-            raise ValueError('Response too large')
-
-    cv2_img_flag = 0
-    img_array = np.asarray(bytearray(content), dtype=np.uint8)
-    return cv2.imdecode(img_array, cv2_img_flag)
+    bits = url.split("/")
+    test_image_path = "downloaded_images/"+str(bits[-1])
+    urllib.urlretrieve(url, test_image_path)
+    image = cv2.imread(test_image_path)
+    return image
 
 
 # TODO: move to deploy.py (see get_data_from_file)
 def normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=None):
     result = data.resize(cvimage, size)
-    if mean:
+    print("premean")
+    if mean is not None:
         result = result - mean
+    print("pre_result")
     return result / 255
 
 
@@ -278,6 +280,7 @@ if __name__ == '__main__':
     import configargparse
 
     parser = configargparse.getArgumentParser()
+
     parser.add('-c', '--config', required=False, is_config_file=True, help='Config file path. See bot.ini.example')
     parser.add('--consumer-key', required=True, env_var='CONSUMER_KEY', help='Twitter app consumer key')
     parser.add('--consumer-secret', required=True, env_var='CONSUMER_SECRET', help='Twitter app consumer secret')
