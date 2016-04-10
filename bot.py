@@ -21,6 +21,7 @@ import tweepy
 
 import data
 import deploy
+import gceutil
 
 
 INPUT_SHAPE = 128  # change it to your input image size
@@ -277,14 +278,25 @@ if __name__ == '__main__':
     import configargparse
 
     parser = configargparse.getArgumentParser()
-    parser.add('-c', '--config', required=False, is_config_file=True, help='config file path')
-    parser.add('--consumer-key')
-    parser.add('--consumer-secret')
-    parser.add('--access-token')
-    parser.add('--access-token-secret')
-    parser.add('--dataset-path', default='data.hdf5')
-    parser.add('--mock', action='store_true', default=False, help='test bot without model data')
-    parser.add('--debug', action='store_true', default=False, help='set log level to debug')
+    parser.add('-c', '--config', required=False, is_config_file=True, help='Config file path. See bot.ini.example')
+    parser.add('--consumer-key', required=True, env_var='CONSUMER_KEY', help='Twitter app consumer key')
+    parser.add('--consumer-secret', required=True, env_var='CONSUMER_SECRET', help='Twitter app consumer secret')
+    parser.add('--access-token', required=True, env_var='ACCESS_TOKEN', help='Twitter access token')
+    parser.add('--access-token-secret', required=True, env_var='ACCESS_TOKEN_SECRET', help='Twitter access token secret')
+    parser.add('--dataset-path', default='data/data.hdf5')
+    parser.add('--mock', action='store_true', default=False, help='Test bot without model data')
+    parser.add('--debug', action='store_true', default=False, help='Set log level to debug')
 
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except SystemExit as e:
+        if gceutil.detect_gce_environment(logger):
+            attr_env_vars = {action.dest.replace('_', '-'): action.env_var
+                             for action in parser._actions if action.env_var}
+            metadata = gceutil.get_metadata(attr_env_vars.keys())
+            env_vars = {attr_env_vars[attr]: value for attr, value in metadata.items()}
+            args = parser.parse_args(env_vars=env_vars)
+        else:
+            raise
+
     main(args)
