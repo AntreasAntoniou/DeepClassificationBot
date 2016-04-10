@@ -74,8 +74,99 @@ Things to try:
 1. Create your own classifiers
 2. Try different model architectures (Hint: go to google scholar or arxiv and search for GoogLeNet, VGG-Net, AlexNet, ResNet and follow the waves :) )
 
+## Twitter bot
 
-**Special Thanks**
+`bot.py` provides a Twitter bot that provides an interface for querying the classifier.
+
+### Running the bot locally
+
+#### Prerequisites
+
+* A classifier
+* [A Twitter app](https://apps.twitter.com/) registered under the bot account
+* Consumer key and secret for that app
+* [Your access token and secret for that app](https://dev.twitter.com/oauth/overview/application-owner-access-tokens)
+
+Copy `bot.ini.example` to `bot.ini` and overwrite with your key/secret and token/secret.
+
+#### Run it
+
+```
+$ python bot.py -c bot.ini --debug
+```
+
+`python bot.py --help` will list all available command line options.
+
+### Deploying to Google Compute Engine
+
+This repo comes with the necessary support files for deploying the Twitter bot
+to a dedicated GCE container-optimized instance.
+
+#### Prerequisites
+
+* A classifier
+* `bot.ini` with Twitter credentials (see above)
+* [Docker](https://www.docker.com/) tools and an account on a docker registry
+* [Google Cloud SDK](https://cloud.google.com/sdk/#Quick_Start)
+* [A Google Cloud Platform project](https://cloud.google.com/compute/docs/linux-quickstart#set_up_a_google_cloud_platform_project)
+
+#### Build and register your own docker image
+
+`classificationbot/ci:latest` comes with all the dependencies installed.
+However, if you've modified the code and added a new dependency,
+either add that dependency to `dockerfiles/ci/Dockerfile` or make a new
+Docker image based on the dockerfiles in this repo.
+
+`classificationbot/bot:latest` contains the bot and classifier.
+
+This repo's associated images are built with these commands:
+
+```
+$ docker build -t classificationbot/ci:latest -f dockerfiles/ci/Dockerfile .
+$ docker push classificationbot/ci:latest
+$ docker build -t classificationbot/bot:latest -f dockerfiles/bot/Dockerfile .
+$ docker push classificationbot/bot:latest
+```
+
+When you've registered your own image, update the `image` value in `etc/containers.yaml`.
+
+#### Creating and deleting your instance
+
+`tasks.py` provides a handy shortcut for creating a small instance
+with the Docker image specified in `etc/containers.yaml`.
+Twitter credentials are pulled from `bot.ini` and stored as instance metadata.
+
+```
+$ python tasks.py create_instance
+$ python tasks.py delete_instance
+```
+
+#### When something goes wrong
+
+Or when you want to see if it's working for yourself:
+
+```
+## SSH into your instance
+$ gcloud compute ssh --zone us-central1-a bot
+
+## Wait until our container comes up:
+you@bot:~$ sudo watch docker ps
+
+## If it appears to be stuck, check kubelet's log:
+you@bot:~$ sudo less /var/log/kubelet.log
+
+## Once it's up, you can drop into its shell:
+you@bot:~$ sudo docker exec -it $(sudo docker ps --filter=ancestor=classificationbot/bot -q) bash
+
+## And run supervisorctl to check the bot.py process
+# supervisorctl
+
+## You can run it manually too:
+# cd /opt/bot/
+# python bot.py --mock --debug
+```
+
+##Special Thanks
 Special thanks to Francois Chollet (fchollet) for building the superb [Keras](https://github.com/fchollet/keras) deep learning library.
 We couldn't have brought a project ready to be used by non-machine learning people if it wasn't for the ease of use of Keras.
 

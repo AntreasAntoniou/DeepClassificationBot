@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: classificationbot
+spec:
+  containers:
+    - name: classificationbot
+      image: docker.io/classificationbot/bot
+      imagePullPolicy: Always
