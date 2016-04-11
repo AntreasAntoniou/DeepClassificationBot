@@ -1,5 +1,7 @@
 Classification Bot
 ------------------
+
+[![Join the chat at https://gitter.im/AntreasAntoniou/DeepClassificationBot](https://badges.gitter.im/AntreasAntoniou/DeepClassificationBot.svg)](https://gitter.im/AntreasAntoniou/DeepClassificationBot?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 Welcome to the Classification Bot codebase. Classification Bot is an attempt of simplifying the collection, extraction and preprocessing of data as well as providing an end to end pipeline for using them to train large deep neural networks.
 
 The system is composed of scrapers, data extractors, preprocessors, deep neural network models using [Keras](https://github.com/fchollet/keras) provided by [Francois Chollet](https://github.com/fchollet) and an easy to use deployment module.
