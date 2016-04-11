@@ -26,22 +26,22 @@ $ pip install -r requirements.txt
 
 ### To download images
 
-Easy Mode: (For users that have a list of categories available at hand):
-1. Build a .csv files with one category per line of what you want the scraper to search for.
+#### Easy Mode:
+(For users that have a list of categories available at hand):
+1. Build a .csv file with one category per line of what you want the scraper to search for.
 2. Now let's download some images! Run python google_image_scraper.py yourfilehere.csv
 
-Coder Mode: (For users that know an online repo that has their categories and want to fetch them, or if their categories are too many and you MUST automate the procedure, or if you much rather code stuff rather than copy and paste)
+#### Hacker Mode:
+ (For users that know an online repo that has their categories and want to fetch them, or if their categories are too many and you MUST automate the procedure, or if you much rather code stuff rather than copy and paste)
 
 1. Build a module that can fetch your categories using wikipedia or any other resource you would like. For a use case look at examples/anime_show_extractor.py to see what we used to get our categories.
 2. Have your module create a .csv file with the categories you require.
 3. Then run python google_image_scraper.py yourfilehere.csv
 
-Hacker Mode (Not really useful unless you know what you are doing):
+##### Note: Some information on google_image_scraper.py
 
-1. Edit google_image_scraper.py using your favourite editor. In the main loop add classes in the "list" or use your own custom category extractor to find classes online, such as species of dogs.
-types of fruits, names of gundams etc. Set the number of images to the number of images per class, we suggest a number between 200-1000.
-2. Then run `python google_image_scraper.py` to get all of the required images.
-3. Wait until images have been downloaded. You should be able to see them in folders under downloaded_images, in classes.
+When downloading images make sure you set the number of images to the number of images per class, we suggest a number between 200-1000.
+
 
 ### To extract and preprocess data ready for training
 
