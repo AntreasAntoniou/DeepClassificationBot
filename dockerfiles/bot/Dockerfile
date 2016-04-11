@@ -1,5 +1,5 @@
 # docker build -t classificationbot/bot:latest -f dockerfiles/bot/Dockerfile .
-FROM classificationbot/ci:latest
+FROM classificationbot/base:latest
 
 RUN pip install supervisor
 RUN mkdir -p /opt/bot/data/ /opt/bot/pre_trained_weights/
