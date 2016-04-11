@@ -9,15 +9,19 @@ from __future__ import division
 
 import time
 import random
+import os
 import functools
 import logging
 import urllib
+import urllib2
 from multiprocessing import TimeoutError
 import multiprocessing.pool
 
+import cStringIO
 import cv2
 import h5py
 import tweepy
+from scipy import ndimage
 
 import data
 import deploy
@@ -88,9 +92,7 @@ class ImageClassifier(object):
         self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
 
     def classify(self, cvimage):
-        print(cvimage.shape)
         normalized = normalize_cvimage(cvimage, mean=self.average_image)
-        print("Normalized image")
         return deploy.apply_model(normalized, self.model, self.category_to_catnames, multi=False)
 
 
@@ -198,7 +200,6 @@ class ReplyToTweet(tweepy.StreamListener):
 
         try:
             cvimage = fetch_cvimage_from_url(maybe_image_url)
-            print("Got image")
         except TimeoutError:
             logger.debug("{0} timed out while fetching {1}".format(status_id, maybe_image_url))
             return messages.took_too_long()
@@ -243,16 +244,18 @@ def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
     test_image_path = "downloaded_images/" + str(bits[-1])
     urllib.urlretrieve(url, test_image_path)
     image = cv2.imread(test_image_path)
+    os.remove(test_image_path)
+    # file = cStringIO.StringIO(urllib2.urlopen(url).read()) #for further investigation
+    # image = ndimage.imread(file, mode='RGB')
+    #print(image.shape)
     return image
 
 
 # TODO: move to deploy.py (see get_data_from_file)
 def normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=None):
     result = data.resize(cvimage, size)
-    print("premean")
     if mean is not None:
         result = result - mean
-    print("pre_result")
     return result / 255
 
 
