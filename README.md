@@ -122,7 +122,7 @@ However, if you've modified the code and added a new dependency,
 either add that dependency to `dockerfiles/ci/Dockerfile` or make a new
 Docker image based on the dockerfiles in this repo.
 
-`classificationbot/bot:latest` contains the bot and classifier.
+`dockerfiles/bot/Dockerfile` will contain the bot and the classifier when built.
 
 This repo's associated images are built with these commands:
 
