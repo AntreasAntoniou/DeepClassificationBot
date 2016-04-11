@@ -26,23 +26,28 @@ $ pip install -r requirements.txt
 
 ### To download images
 
+Use `google_image_scraper.py` to download images. It takes a .csv file of the categories you want, and downloads a number of images per line.
+
+The first line of the .csv file will be ignored.
+
+The number of images per category is configurable. We suggest a number between 200-1000:
+
+```
+$ google_image_scraper.py -n 200 yourfilehere.csv
+```
+
 #### Easy Mode:
 (For users that have a list of categories available at hand):
 
-1. Build a .csv file with one category per line of what you want the scraper to search for.
-2. Now let's download some images! Run python google_image_scraper.py yourfilehere.csv
+1. Create a .csv file with one category per line of what you want the scraper to search for.
+2. Now let's download some images! Run `python google_image_scraper.py yourfilehere.csv`
 
 #### Hacker Mode:
  (For users that know an online repo that has their categories and want to fetch them, or if their categories are too many and you MUST automate the procedure, or if you much rather code stuff rather than copy and paste)
 
-1. Build a module that can fetch your categories using wikipedia or any other resource you would like. For a use case look at examples/anime_show_extractor.py to see what we used to get our categories.
-2. Have your module create a .csv file with the categories you require.
-3. Then run python google_image_scraper.py yourfilehere.csv
-
-##### Note: Some information on google_image_scraper.py
-
-When downloading images make sure you set the number of images to the number of images per class, we suggest a number between 200-1000.
-
+1. Write a script that can fetch your categories using Wikipedia or any other resource you would like. For an example look at `examples/anime_show_extractor.py` to see what we used to get our categories.
+2. Have your script create a .csv file with the categories you require.
+3. Then run `python google_image_scraper.py yourfilehere.csv`
 
 ### To extract and preprocess data ready for training
 
