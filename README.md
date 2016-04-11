@@ -28,6 +28,7 @@ $ pip install -r requirements.txt
 
 #### Easy Mode:
 (For users that have a list of categories available at hand):
+
 1. Build a .csv file with one category per line of what you want the scraper to search for.
 2. Now let's download some images! Run python google_image_scraper.py yourfilehere.csv
 
@@ -116,18 +117,21 @@ to a dedicated GCE container-optimized instance.
 
 #### Build and register your own docker image
 
-`classificationbot/ci:latest` comes with all the dependencies installed.
-However, if you've modified the code and added a new dependency,
-either add that dependency to `dockerfiles/ci/Dockerfile` or make a new
-Docker image based on the dockerfiles in this repo.
+`classificationbot/base:latest` comes with all the dependencies installed.
+If you've modified the code and added a new dependency,
+make a new Docker image based on the dockerfiles in this repo.
 
-`classificationbot/bot:latest` contains the bot and classifier.
+`dockerfiles/bot/Dockerfile` will contain the bot and the classifier when built.
 
 This repo's associated images are built with these commands:
 
 ```
+$ docker build -t classificationbot/base:latest -f dockerfiles/base/Dockerfile .
+$ docker push classificationbot/base:latest
+
 $ docker build -t classificationbot/ci:latest -f dockerfiles/ci/Dockerfile .
 $ docker push classificationbot/ci:latest
+
 $ docker build -t classificationbot/bot:latest -f dockerfiles/bot/Dockerfile .
 $ docker push classificationbot/bot:latest
 ```

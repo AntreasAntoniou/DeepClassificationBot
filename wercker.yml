@@ -1,0 +1,16 @@
+box: classificationbot/ci
+build:
+  steps:
+    - pip-install:
+        requirements_file: "requirements-dev.txt"
+    - script:
+        name: python unit test
+        code: |
+          set +e -x
+          PYTHONPATH=. py.test --junit-xml=results.xml
+          status=$?
+          flake8 .
+          status=$status || $?
+          pylint --py3k *.py
+          status=$status || $?
+          exit $status

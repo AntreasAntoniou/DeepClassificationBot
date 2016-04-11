@@ -44,4 +44,15 @@ crashlytics-build.properties
 fabric.properties
 
 # project specific files
+*.csv
 bot.ini
+/_builds/
+/_cache/
+/_projects/
+/_steps/
+!/data/README.md
+/data/*
+/downloaded_images/README.md
+!/downloaded_images/*
+!/pre_trained_weights/README.md
+/pre_trained_weights/*
