@@ -26,13 +26,15 @@ $ pip install -r requirements.txt
 
 ### To download images
 
-Easy Mode:
+Easy Mode: (For users that have a list of categories available at hand):
+1. Build a .csv files with one category per line of what you want the scraper to search for.
+2. Now let's download some images! Run python google_image_scraper.py yourfilehere.csv
 
-1. Edit name_extractor.py and add a get_* method. For your convenience we provide a get_cars() method to showcase a use-case.
-2. Run `python name_extractor.py cars > cars.csv` to create a csv with the names you want to download images of.
-3. Now let's download some images! Run `python google_image_scraper.py cars.csv`
+Coder Mode: (For users that know an online repo that has their categories and want to fetch them, or if their categories are too many and you MUST automate the procedure, or if you much rather code stuff rather than copy and paste)
 
-  **Note**: Make sure to replace cars with your own item names otherwise you will be using cars, unless you modified the get_cars method to get something other than cars, in which case you should really rename your method for proper code readability.
+1. Build a module that can fetch your categories using wikipedia or any other resource you would like. For a use case look at examples/anime_show_extractor.py to see what we used to get our categories.
+2. Have your module create a .csv file with the categories you require.
+3. Then run python google_image_scraper.py yourfilehere.csv
 
 Hacker Mode (Not really useful unless you know what you are doing):
 
