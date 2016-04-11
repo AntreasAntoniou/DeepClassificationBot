@@ -28,6 +28,7 @@ $ pip install -r requirements.txt
 
 #### Easy Mode:
 (For users that have a list of categories available at hand):
+
 1. Build a .csv file with one category per line of what you want the scraper to search for.
 2. Now let's download some images! Run python google_image_scraper.py yourfilehere.csv
 
