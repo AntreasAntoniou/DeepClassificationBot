@@ -45,3 +45,7 @@ fabric.properties
 
 # project specific files
 bot.ini
+/_builds/
+/_cache/
+/_projects/
+/_steps/
