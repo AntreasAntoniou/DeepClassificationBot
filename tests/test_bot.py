@@ -26,7 +26,8 @@ def test_fetch_cvimage_from_url_non_image(monkeypatch):
 
 
 def test_fetch_cvimage_from_url_timeout(monkeypatch):
-    long_func = lambda *args, **kwargs: time.sleep(3)
+    def long_func(*args, **kwargs):
+        time.sleep(3)
     monkeypatch.setattr(requests, 'get', long_func)
     with pytest.raises(TimeoutError):
         bot.fetch_cvimage_from_url('this url is ignored', timeout_max_timeout=1)

@@ -35,7 +35,7 @@ $ pip install -r requirements.txt
 #### Hacker Mode:
  (For users that know an online repo that has their categories and want to fetch them, or if their categories are too many and you MUST automate the procedure, or if you much rather code stuff rather than copy and paste)
 
-1. Build a module that can fetch your categories using wikipedia or any other resource you would like. For a use case look at examples/anime_show_extractor.py to see what we used to get our categories.
+1. Build a module that can fetch your categories using wikipedia or any other resource you would like. For a use case look at `examples/anime_names.py` to see what we used to get our categories.
 2. Have your module create a .csv file with the categories you require.
 3. Then run python google_image_scraper.py yourfilehere.csv
 

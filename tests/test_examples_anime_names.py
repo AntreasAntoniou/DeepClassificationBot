@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import requests
-import name_extractor
+from examples import anime_names
 import mocks
 
 
@@ -12,7 +12,7 @@ def test_top_n_shows(monkeypatch):
             (no_shows, []),
     ]:
         monkeypatch.setattr(requests, 'get', mocks.mock_get(report))
-        shows = name_extractor.get_top_n_shows(100)
+        shows = anime_names.get_top_n_shows(100)
         assert shows['items'] == expected
 
 
@@ -29,7 +29,7 @@ def test_list_characters(monkeypatch):
             'fields': ['show'],
             'items': [{'id': '11770'}, {'id': '10216'}],
         }
-        characters = name_extractor.list_characters(shows)['items']
+        characters = anime_names.list_characters(shows)['items']
         assert list(characters) == expected
 
 
