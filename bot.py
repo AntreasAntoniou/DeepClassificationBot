@@ -20,13 +20,14 @@ import multiprocessing.pool
 import cStringIO
 import cv2
 import h5py
+import requests
 import tweepy
 from scipy import ndimage
 
 import data
 import deploy
 import gceutil
-
+import numpy as np
 
 INPUT_SHAPE = 128  # change it to your input image size
 logging.basicConfig()
@@ -240,14 +241,14 @@ def url_from_entities(entities):
 
 @timeout(30)
 def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
-    bits = url.split("/")
-    test_image_path = "downloaded_images/" + str(bits[-1])
-    urllib.urlretrieve(url, test_image_path)
-    image = cv2.imread(test_image_path)
-    os.remove(test_image_path)
-    # file = cStringIO.StringIO(urllib2.urlopen(url).read()) #for further investigation
-    # image = ndimage.imread(file, mode='RGB')
-    #print(image.shape)
+
+    req = requests.get(url, timeout=5, stream=True)
+    content = ''
+    for chunk in req.iter_content(2048):
+        content += chunk
+    img_array = np.asarray(bytearray(content), dtype=np.uint8)
+    cv2_img_flag = cv2.CV_LOAD_IMAGE_COLOR
+    image = cv2.imdecode(img_array, cv2_img_flag)
     return image
 
 
