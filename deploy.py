@@ -84,7 +84,7 @@ def apply_model(X, model, categories, top_k=3):
 
 
 if __name__ == '__main__':
-    import h5py
+    import numpy as np
     # If used as script then run example use case
     import sys
     import urllib
@@ -93,8 +93,7 @@ if __name__ == '__main__':
     test_image_folder = ''
     image = False
     folder = False
-    dataset = h5py.File("data.hdf5", "r")
-    average_image = dataset['mean'][:]
+    average_image = np.load("data/mean.npy")
 
     if sys.argv[1] == "--URL":
         link = sys.argv[2]

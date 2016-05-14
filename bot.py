@@ -84,8 +84,7 @@ class ImageClassifier(object):
         self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
         self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=len(catname_to_categories))
 
-        dataset = h5py.File(dataset_path, "r")
-        self.average_image = dataset['mean'][:]
+        self.average_image = np.load("data/mean.npy")
 
     def classify(self, cvimage):
         normalized = deploy.normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=self.average_image)
