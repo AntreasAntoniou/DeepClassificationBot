@@ -22,7 +22,7 @@ Prediction = namedtuple('Prediction', 'rank category probability')
 
 def load_model(input_shape, n_outputs=100):
     '''Loads and compiles pre-trained model to be used for real-time predictions'''
-    model = m.get_model(input_size=input_shape, n_outputs=n_outputs)
+    model = m.get_deep_anime_model(input_size=input_shape, n_outputs=n_outputs)
     model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
