@@ -193,10 +193,11 @@ class DMMessages(Messages):
 
 
 class ReplyToTweet(tweepy.StreamListener):
-    def __init__(self, screen_name, classifier, api=None):
+    def __init__(self, screen_name, classifier, api=None, silent=False):
         super(ReplyToTweet, self).__init__(api)
         self.screen_name = screen_name
         self.classifier = classifier
+        self.silent = silent
 
     @wait_like_a_human
     def on_direct_message(self, data):
@@ -209,6 +210,8 @@ class ReplyToTweet(tweepy.StreamListener):
         logger.debug(u"{0} incoming dm {1}".format(status['id'], status['text']))
 
         reply = self.get_reply(status['id'], status['entities'], TWEET_MAX_LENGTH - len('d {} '.format(sender_name)), DMMessages)
+        if self.silent:
+            return
         return self.api, 'send_direct_message', tuple(), dict(user_id=status['sender']['id'], text=reply)
 
     @wait_like_a_human
@@ -230,6 +233,8 @@ class ReplyToTweet(tweepy.StreamListener):
         prefix = '@{0} '.format(sender_name)
         reply = self.get_reply(status.id, status.entities, TWEET_MAX_LENGTH - len(prefix), StatusMessages)
         status_text = prefix + reply
+        if self.silent:
+            return
         return self.api, 'update_status', (status_text,), dict(in_reply_to_status_id=status.id)
 
     def get_reply(self, status_id, entities, max_length, messages):
@@ -320,7 +325,7 @@ def main(args):
     else:
         classifier = ImageClassifier(args.dataset_path)
 
-    stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api))
+    stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api, args.silent))
     logger.info('Listening as {}'.format(screen_name))
     stream.userstream(track=[screen_name])
 
@@ -337,6 +342,7 @@ if __name__ == '__main__':
     parser.add('--access-token-secret', required=True, env_var='ACCESS_TOKEN_SECRET', help='Twitter access token secret')
     parser.add('--dataset-path', default='data/data.hdf5')
     parser.add('--mock', action='store_true', default=False, help='Test bot without model data')
+    parser.add('--silent', action='store_true', default=False, help='Test bot without actually replying')
     parser.add('--debug', action='store_true', default=False, help='Set log level to debug')
 
     try:
