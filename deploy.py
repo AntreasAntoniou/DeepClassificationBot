@@ -65,7 +65,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
     y = []
     if not multi:
         X = np.array([X])
-        y_temp = model.predict_proba(X=X, batch_size=1)
+        y_temp = model.predict_proba(x=X, batch_size=1)
         top_n = y_temp.argsort()
         res = []
         for sample in top_n:
@@ -77,7 +77,7 @@ def apply_model(X, model, categories, multi=False, top_k=3):
     else:
         for image in X:
             image = np.array([image])
-            y_temp = model.predict_proba(X=image, batch_size=1)
+            y_temp = model.predict_proba(x=image, batch_size=1)
             top_n = y_temp.argsort()
             res = []
             for sample in top_n:
