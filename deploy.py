@@ -17,7 +17,7 @@ import model as m
 import data
 
 
-Prediction = namedtuple('Prediction', 'category probability')
+Prediction = namedtuple('Prediction', 'rank category probability')
 
 
 def load_model(input_shape, n_outputs=100):
@@ -76,8 +76,8 @@ def apply_model(X, model, categories, top_k=3):
     for sample in top_n:
         sample = sample.tolist()
         sample.reverse()
-        for item in sample[:top_k]:
-            res.append(Prediction(categories[item], y[0, item]))
+        for i, item in enumerate(sample[:top_k]):
+            res.append(Prediction(i + 1, categories[item], y[0, item]))
     return res
 
 
@@ -126,6 +126,6 @@ if __name__ == '__main__':
         print("______________________________________________")
         print("Image Name: {}".format(name))
         print("Categories: ")
-        for i, pred in enumerate(y):
-            print("{0}. {1} {2:.2%}".format(i + 1, pred.category, pred.probability))
+        for pred in y:
+            print("{0}. {1} {2:.2%}".format(pred.rank, pred.category, pred.probability))
         print("______________________________________________")
