@@ -83,14 +83,12 @@ class MockClassifier(object):
 
 class ImageClassifier(object):
     def __init__(self, dataset_path):
-        dataset = h5py.File(dataset_path, "r")
-        self.average_image = dataset['mean'][:]
-
-        n_categories = dataset['n_categories'].value
-        self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=n_categories)
-
         catname_to_categories = data.get_categories()
         self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
+        self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=len(catname_to_categories))
+
+        dataset = h5py.File(dataset_path, "r")
+        self.average_image = dataset['mean'][:]
 
     def classify(self, cvimage):
         normalized = normalize_cvimage(cvimage, mean=self.average_image)

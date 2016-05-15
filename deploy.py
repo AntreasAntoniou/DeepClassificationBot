@@ -99,7 +99,6 @@ if __name__ == '__main__':
     image = False
     folder = False
     dataset = h5py.File("data.hdf5", "r")
-    n_categories = dataset['n_categories'].value
     average_image = dataset['mean'][:]
 
     if sys.argv[1] == "--URL":
@@ -121,9 +120,9 @@ if __name__ == '__main__':
     for key in categories.iterkeys():
         categories_to_strings[categories[key]] = key
 
-    model = load_model(input_shape=image_size, n_outputs=n_categories)
     # this should be run once and kept in memory for all predictions
     # as re-loading it is very time consuming
+    model = load_model(input_shape=image_size, n_outputs=len(categories))
 
     if folder:
         images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
