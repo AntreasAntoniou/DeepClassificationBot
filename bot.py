@@ -131,47 +131,46 @@ class Messages(object):
         )
 
     @classmethod
-    def my_guess(cls, y, max_length=TWEET_MAX_LENGTH, preface="Probable Anime:"):
-        if len(y):
-            pred_lines = []
-            max_category_length = 0
-            max_category_length_index = 0
-            top_n = 3
-
-            for i, pred in enumerate(y[:top_n]):
-                pred_lines.append(deploy.Prediction(
-                    "{}.".format(pred.rank),
-                    pred.category,
-                    "{:.2%}".format(pred.probability),
-                ))
-                if max_category_length < len(pred.category):
-                    max_category_length_index = i
-                    max_category_length = len(pred.category)
-
-            newline_count = len(pred_lines)
-            pred_length = sum(sum(map(len, pred)) + len(pred) - 1 for pred in pred_lines)
-            current_length = len(preface) + newline_count + pred_length
-
-            # truncate category name(s) if needed
-            if current_length > max_length:
-                lengthy_pred = pred_lines[max_category_length_index]
-                excess_length = current_length - max_length
-                # don't penalize the longest category if it's going to be truncated too much
-                if len(lengthy_pred.category) * 0.5 < excess_length:
-                    subtract_from_everyone_length = int(math.ceil(excess_length / len(pred_lines)))
-                    pred_lines = [
-                        deploy.Prediction(
-                            pred.rank, pred.category[:-subtract_from_everyone_length], pred.probability)
-                               for pred in pred_lines]
-                else:
-                    shortened_pred = deploy.Prediction(
-                        lengthy_pred.rank, lengthy_pred.category[:-excess_length], lengthy_pred.probability)
-                    pred_lines[max_category_length_index] = shortened_pred
-
-            reply = "{}\n{}".format(preface, "\n".join(" ".join(pred) for pred in pred_lines))
-            return reply[:max_length]
-        else:
+    def my_guess(cls, y, top_n=3, max_length=TWEET_MAX_LENGTH, preface="Probable Anime:"):
+        if not len(y):
             return cls.unknown_image()
+
+        pred_lines = []
+        max_category_length = 0
+        max_category_length_index = 0
+
+        for i, pred in enumerate(y[:top_n]):
+            pred_lines.append(deploy.Prediction(
+                "{}.".format(pred.rank),
+                pred.category,
+                "{:.2%}".format(pred.probability),
+            ))
+            if max_category_length < len(pred.category):
+                max_category_length_index = i
+                max_category_length = len(pred.category)
+
+        newline_count = len(pred_lines)
+        pred_length = sum(sum(map(len, pred)) + len(pred) - 1 for pred in pred_lines)
+        current_length = len(preface) + newline_count + pred_length
+
+        # truncate category name(s) if needed
+        if current_length > max_length:
+            lengthy_pred = pred_lines[max_category_length_index]
+            excess_length = current_length - max_length
+            # don't penalize the longest category if it's going to be truncated too much
+            if len(lengthy_pred.category) * 0.5 < excess_length:
+                subtract_from_everyone_length = int(math.ceil(excess_length / len(pred_lines)))
+                pred_lines = [
+                    deploy.Prediction(
+                        pred.rank, pred.category[:-subtract_from_everyone_length], pred.probability)
+                           for pred in pred_lines]
+            else:
+                shortened_pred = deploy.Prediction(
+                    lengthy_pred.rank, lengthy_pred.category[:-excess_length], lengthy_pred.probability)
+                pred_lines[max_category_length_index] = shortened_pred
+
+        reply = "{}\n{}".format(preface, "\n".join(" ".join(pred) for pred in pred_lines))
+        return reply[:max_length]
 
 
 class StatusMessages(Messages):
