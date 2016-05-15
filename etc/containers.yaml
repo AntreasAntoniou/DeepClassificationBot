@@ -7,3 +7,14 @@ spec:
     - name: classificationbot
       image: docker.io/classificationbot/bot
       imagePullPolicy: Always
+      ports:
+        - containerPort: 9001
+          hostPort: 9001
+      volumeMounts:
+        - name: bot-logs
+          mountPath: /var/log
+          readOnly: false
+  volumes:
+    - name: bot-logs
+      hostPath:
+        path: /var/log/bot
