@@ -6,12 +6,18 @@ shows a use case of the deploy.py module, and also has argument parsing which al
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
-import model as m
+
 import os
+from collections import namedtuple
+
 import cv2
 import numpy as np
 
+import model as m
 import data
+
+
+Prediction = namedtuple('Prediction', 'category probability')
 
 
 def load_model(input_shape, n_outputs=100):
@@ -40,8 +46,7 @@ def get_data_from_folder(test_image_folder, mean=None, size=256):
                     image = image / 255
                     images.append(image)
 
-    return np.array(images), names
-
+    return images, names
 
 
 def get_data_from_file(filepath, size=256, mean=None):
@@ -59,33 +64,21 @@ def get_data_from_file(filepath, size=256, mean=None):
 
     return image, name
 
-def apply_model(X, model, categories, multi=False, top_k=3):
-    '''Apply model and produce top k predictions for given images'''
-    y = []
-    if not multi:
-        X = np.array([X])
-        y_temp = model.predict_proba(x=X, batch_size=1)
-        top_n = y_temp.argsort()
-        res = []
-        for sample in top_n:
-            sample = sample.tolist()
-            sample.reverse()
-            for item in sample:
-                res.append("{category}: {probability:.2%}".format(category=categories[item], probability=y_temp[0, item]))
-        return res
-    else:
-        for image in X:
-            image = np.array([image])
-            y_temp = model.predict_proba(x=image, batch_size=1)
-            top_n = y_temp.argsort()
-            res = []
-            for sample in top_n:
-                sample = sample.tolist()
-                sample.reverse()
-                for item in range(top_k):
-                    res.append(str(categories[sample[item]]) + ": " + str(y_temp[0, sample[item]]))
-            y.append(res)
-    return y
+
+def apply_model(X, model, categories, top_k=3):
+    '''Apply model and produce top k predictions for given images
+    Returns: [Prediction]
+    '''
+    X = np.array([X])
+    y = model.predict_proba(x=X, batch_size=1)
+    top_n = y.argsort()
+    res = []
+    for sample in top_n:
+        sample = sample.tolist()
+        sample.reverse()
+        for item in sample[:top_k]:
+            res.append(Prediction(categories[item], y[0, item]))
+    return res
 
 
 if __name__ == '__main__':
@@ -126,22 +119,16 @@ if __name__ == '__main__':
 
     if folder:
         images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
-        y = apply_model(images, model, categories_to_strings, multi=True)
-        print(len(y))
-        for i in range(len(y)):
-            item = y[i]
-            print("______________________________________________")
-            print("Image Name: {}".format(str(names[i])))
-            print(" Categories: ")
-            for j in range(5):
-                print("{0}. {1}".format(j + 1, item[j] * 100))
-            print("______________________________________________")
     elif image:
-        images, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
-        y = apply_model(images, model, categories_to_strings, multi=False)
-        print("_________________________________________________")
+        image, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
+        images = [image]
+        names = [name]
+
+    for image, name in zip(images, names):
+        y = apply_model(image, model, categories_to_strings)
+        print("______________________________________________")
         print("Image Name: {}".format(name))
         print("Categories: ")
-        for i in range(5):
-            print("{0}. {1}".format(i + 1, y[i]))
-        print("_________________________________________________")
+        for i, pred in enumerate(y):
+            print("{0}. {1} {2:.2%}".format(i + 1, pred.category, pred.probability))
+        print("______________________________________________")

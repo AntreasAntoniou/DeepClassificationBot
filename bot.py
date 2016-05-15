@@ -92,7 +92,7 @@ class ImageClassifier(object):
 
     def classify(self, cvimage):
         normalized = normalize_cvimage(cvimage, mean=self.average_image)
-        return deploy.apply_model(normalized, self.model, self.category_to_catnames, multi=False)
+        return deploy.apply_model(normalized, self.model, self.category_to_catnames)
 
 
 def at_random(*messages):
