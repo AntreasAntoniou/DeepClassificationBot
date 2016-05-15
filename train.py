@@ -1,15 +1,3 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import division
-
-import h5py
-
-import data
-import numpy as np
-import model as m
-import argparse
-
-
 '''
 This module provides all the methods needed to train and validation test a deep neural network. Training includes:
 1. Data Extraction or Loading already extracted data
@@ -31,7 +19,16 @@ checkpoint using the "cont" argument in the run method. Just run python train.py
 running.
 5. Validation checks after each epoch, as well as output of top-k accuracy for your convenience.
 '''
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
 
+import argparse
+import h5py
+import numpy as np
+
+import data
+import model as m
 
 
 def get_top_n_error(preds, y, n):

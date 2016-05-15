@@ -252,7 +252,6 @@ def url_from_entities(entities):
 
 @timeout(30)
 def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
-
     req = requests.get(url, timeout=5, stream=True)
     content = ''
     for chunk in req.iter_content(2048):

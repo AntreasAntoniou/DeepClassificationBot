@@ -1,21 +1,24 @@
+'''This module provides all the methods needed for data extraction, preprocessing, storing and retrieval.
+
+A deep neural network is nothing but a bunch of random parameters without massive amounts of high quality data
+to train it on, and as such a large percentage of project time was spent building the data.py methods. Our main
+storage system is HDF5 as it provides a pythonic object oriented approach to storing along with numpy combability and
+very fast streaming capabilities. An additional plus was the ability of "fancy indexing" or list of indexes type of
+sample access. Most of the details are provided in the methods docstrings
+'''
 from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
+import os
 import pickle
 import random
-import os
+
 import cv2
 import numpy as np
-from keras.utils import np_utils
 import h5py
+from keras.utils import np_utils
 from keras.utils.io_utils import HDF5Matrix
 
-'''This module provides all the methods needed for data extraction, preprocessing, storing and retrieval.
-   A deep neural network is nothing but a bunch of random parameters without massive amounts of high quality data
-   to train it on, and as such a large percentage of project time was spent building the data.py methods. Our main
-   storage system is HDF5 as it provides a pythonic object oriented approach to storing along with numpy combability and
-   very fast streaming capabilities. An additional plus was the ability of "fancy indexing" or list of indexes type of
-   sample access. Most of the details are provided in the methods docstrings'''
 
 def extract_data(rootdir=None, size=256):
     '''Extracts the data from the downloaded_images folders

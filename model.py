@@ -1,3 +1,9 @@
+'''
+This module provides all the methods needed to build a deep neural network using the Keras deep learning library.
+Keras was build by Francois Chollet (fchollet) and is essentially an abstraction library that is universal in the sense
+that it can run on top of both theano and tensorflow which makes it especially powerful and adaptive to your project's
+needs.
+'''
 from __future__ import absolute_import
 from __future__ import print_function
 
@@ -9,13 +15,6 @@ from keras.layers.advanced_activations import LeakyReLU
 from keras.layers.normalization import BatchNormalization
 from keras.regularizers import l2
 from keras import backend as K
-
-'''
-This module provides all the methods needed to build a deep neural network using the Keras deep learning library.
-Keras was build by Francois Chollet (fchollet) and is essentially an abstraction library that is universal in the sense
-that it can run on top of both theano and tensorflow which makes it especially powerful and adaptive to your project's
-needs.
-'''
 
 
 def get_model(n_outputs=1000, input_size=256):

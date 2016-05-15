@@ -1,16 +1,17 @@
-from __future__ import absolute_import
-from __future__ import print_function
-from __future__ import division
-import model as m
-import os
-import data
-import cv2
-import numpy as np
 '''
 This module provides all the methods needed to succesfully deploy a model. We provide methods for URL based, file based
 and folder based deployment. Allowing you to choose one to mix and match with your own project's needs. The main method
 shows a use case of the deploy.py module, and also has argument parsing which allows you to quickly test your models.
 '''
+from __future__ import absolute_import
+from __future__ import print_function
+from __future__ import division
+import model as m
+import os
+import cv2
+import numpy as np
+
+import data
 
 
 def load_model(input_shape, n_outputs=100):
@@ -19,7 +20,6 @@ def load_model(input_shape, n_outputs=100):
     model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
     model.compile(loss='categorical_crossentropy', optimizer='adam')
     return model
-
 
 
 def get_data_from_folder(test_image_folder, mean=None, size=256):
@@ -46,7 +46,6 @@ def get_data_from_folder(test_image_folder, mean=None, size=256):
 
 def get_data_from_file(filepath, size=256, mean=None):
     '''Get image from file ready to be used with the deep neural network'''
-    import data
 
     image = cv2.imread(filepath)
     image = data.resize(image, size)
