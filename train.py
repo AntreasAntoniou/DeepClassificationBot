@@ -47,7 +47,6 @@ def get_top_n_error(preds, y, n):
     return accuracy
 
 
-
 def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True, size=256, top_k=5):
     '''Does the routine required to get the data, put them in needed format and start training the model
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
@@ -69,10 +68,10 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
     print("Number of samples {}".format(nb_samples))
 
     data_ids = np.arange(start=0, stop=nb_samples)
-    val_ids = data.produce_validation_indices(data_ids, nb_samples*validation_percentage)
-    train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=nb_samples*training_percentage,
+    val_ids = data.produce_validation_indices(data_ids, nb_samples * validation_percentage)
+    train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=nb_samples * training_percentage,
                                            val_indx=val_ids)
-    #X_train, y_train, X_test, y_test = data.split_data(X, y, split_ratio=split)
+    # X_train, y_train, X_test, y_test = data.split_data(X, y, split_ratio=split)
     X_train, y_train, X_val, y_val = data.load_dataset_bit_from_hdf5(train_ids, val_ids, only_train=False)
     X_val = X_val / 255
 
@@ -80,7 +79,7 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
     model = m.get_model(n_outputs=num_categories, input_size=size)
 
     if cont:
-        #model.load_weights_until_layer("pre_trained_weights/latest_model_weights.hdf5", 26)
+        # model.load_weights_until_layer("pre_trained_weights/latest_model_weights.hdf5", 26)
         model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
 
@@ -102,17 +101,16 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         current_loss = metadata.history['loss'][-1]
         current_val_loss = metadata.history['val_loss'][-1]
         preds = model.predict_proba(X_val, batch_size=64)
-        print("Loss: " + str(current_loss))
-        print("Val_loss: " + str(current_val_loss))
+        print("Loss: {}".format(current_loss))
+        print("Val_loss: {}".format(current_val_loss))
 
         top_3_error = get_top_n_error(preds, y_val, top_k)
-        print("Top 3 error: "+str(top_3_error))
+        print("Top 3 error: {}".format(top_3_error))
         if current_val_loss < best_performance:
             model.save_weights("pre_trained_weights/model_weights.hdf5", overwrite=True)
             best_performance = current_val_loss
             print("Saving weights..")
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
-
 
 
 def extract_data(size=256):
@@ -126,8 +124,6 @@ def extract_data(size=256):
 
 
 if __name__ == '__main__':
-    import argparse
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--extract_data', dest='extract_data', action='store_const', const=True, default=False)
     parser.add_argument('--run', dest='run', action='store_const', const=True, default=False)

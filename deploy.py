@@ -86,7 +86,7 @@ if __name__ == '__main__':
     # If used as script then run example use case
     import sys
     import urllib
-    image_size = 128 #change this to match your image size
+    image_size = 128  # change this to match your image size
     test_image_path = ''
     test_image_folder = ''
     image = False

@@ -7,23 +7,18 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import os
 import time
 import random
 import math
 import functools
 import logging
-import urllib
-import urllib2
 from multiprocessing import TimeoutError
 import multiprocessing.pool
 
-import cStringIO
 import cv2
 import h5py
 import requests
 import tweepy
-from scipy import ndimage
 
 import data
 import deploy
@@ -163,7 +158,7 @@ class Messages(object):
                 pred_lines = [
                     deploy.Prediction(
                         pred.rank, pred.category[:-subtract_from_everyone_length], pred.probability)
-                           for pred in pred_lines]
+                    for pred in pred_lines]
             else:
                 shortened_pred = deploy.Prediction(
                     lengthy_pred.rank, lengthy_pred.category[:-excess_length], lengthy_pred.probability)

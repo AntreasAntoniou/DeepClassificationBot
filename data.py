@@ -17,7 +17,6 @@ import cv2
 import numpy as np
 import h5py
 from keras.utils import np_utils
-from keras.utils.io_utils import HDF5Matrix
 
 
 def extract_data(rootdir=None, size=256):
@@ -88,7 +87,7 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     # save categories for future use
     pickle.dump(categories, open("data/categories.p", "wb"))
 
-    y = np_utils.to_categorical(y_temp, max(y_temp)+1)
+    y = np_utils.to_categorical(y_temp, max(y_temp) + 1)
     if preset is not None:
         y = np_utils.to_categorical(y_temp, preset)
 
@@ -132,13 +131,13 @@ def produce_validation_indices(dataset_indx, number_of_samples):
 
 def load_dataset_bit_from_hdf5(train_indices, val_indices, only_train=True):
     if only_train:
-        h5f = h5py.File('data.hdf5','r')
+        h5f = h5py.File('data.hdf5', 'r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         h5f.close()
         return X_train, y_train
     else:
-        h5f = h5py.File('data.hdf5','r')
+        h5f = h5py.File('data.hdf5', 'r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         X_val = h5f['X'][val_indices]
