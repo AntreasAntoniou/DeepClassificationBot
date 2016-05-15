@@ -29,40 +29,42 @@ def load_model(input_shape, n_outputs=100):
 
 
 def get_data_from_folder(test_image_folder, mean=None, size=256):
-    '''Extracts images from image folder and gets them ready for use with the deep neural network'''
-    # dir = os.path.dirname(os.path.abspath(__file__))
-    images = []
-    names = []
-    for subdir, dir, files in os.walk(test_image_folder):
-        for file in files:
-            if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
-                filepath = os.path.join(subdir, file)
-                image = cv2.imread(filepath)
-                if image is not None:
-                    image = data.resize(image, size=size)
-                    names.append(file)
-                    if mean is not None:
-                        image = image - mean
-                    image = image / 255
-                    images.append(image)
+    '''Extracts images from image folder and gets them ready for use with the deep neural network.
+    Return: [(cvimage, name_string)]
+    '''
+    image_names = []
+    for subdir, _, files in os.walk(test_image_folder):
+        for filename in files:
+            if not (filename.endswith(".jpg") or filename.endswith(".png") or filename.endswith(".jpeg")):
+                continue
+            filepath = os.path.join(subdir, filename)
+            image, name = get_data_from_file(filepath, size, mean=mean)
+            if image is not None:
+                image_names.append((image, name))
 
-    return images, names
+    return image_names
 
 
 def get_data_from_file(filepath, size=256, mean=None):
-    '''Get image from file ready to be used with the deep neural network'''
+    '''Get image from file ready to be used with the deep neural network.
+    Return: (cvimage, name_string)
+    '''
 
     image = cv2.imread(filepath)
-    image = data.resize(image, size)
+    if image is None:
+        return None, None
 
-    if mean is not None:
-        image = image - mean
-
-    image = (image) / 255
-    bits = filepath.split("/")
-    name = bits[-1]
+    image = normalize_cvimage(image, size=size, mean=mean)
+    name = os.path.basename(filepath)
 
     return image, name
+
+
+def normalize_cvimage(cvimage, size=256, mean=None):
+    result = data.resize(cvimage, size)
+    if mean is not None:
+        result = result - mean
+    return result / 255
 
 
 def apply_model(X, model, categories, top_k=3):
@@ -115,13 +117,12 @@ if __name__ == '__main__':
     model = load_model(input_shape=image_size, n_outputs=len(category_to_catnames))
 
     if folder:
-        images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
+        image_names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
     elif image:
-        image, name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
-        images = [image]
-        names = [name]
+        image_name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
+        image_names = [image_name]
 
-    for image, name in zip(images, names):
+    for image, name in image_names:
         y = apply_model(image, model, category_to_catnames)
         print("______________________________________________")
         print("Image Name: {}".format(name))

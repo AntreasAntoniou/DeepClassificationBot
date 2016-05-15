@@ -88,7 +88,7 @@ class ImageClassifier(object):
         self.average_image = dataset['mean'][:]
 
     def classify(self, cvimage):
-        normalized = normalize_cvimage(cvimage, mean=self.average_image)
+        normalized = deploy.normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=self.average_image)
         return deploy.apply_model(normalized, self.model, self.category_to_catnames)
 
 
@@ -295,14 +295,6 @@ def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
     cv2_img_flag = cv2.CV_LOAD_IMAGE_COLOR
     image = cv2.imdecode(img_array, cv2_img_flag)
     return image
-
-
-# TODO: move to deploy.py (see get_data_from_file)
-def normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=None):
-    result = data.resize(cvimage, size)
-    if mean is not None:
-        result = result - mean
-    return result / 255
 
 
 def main(args):
