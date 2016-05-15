@@ -178,8 +178,8 @@ class StatusMessages(Messages):
     @staticmethod
     def give_me_an_image():
         return at_random(
-            'Give me an image URL or attach it to your tweet',
-            "I don't see an image. Tweet an image URL or attach it please",
+            'Give me a direct image URL or attach it to your tweet',
+            "I don't see an image. Tweet a direct image URL or attach it please",
         )
 
 
@@ -187,8 +187,8 @@ class DMMessages(Messages):
     @staticmethod
     def give_me_an_image():
         return at_random(
-            'Give me an image URL',
-            "I don't see an image. Message me an image URL please",
+            'Give me a direct image URL',
+            "I don't see an image. Message me a direct image URL please",
         )
 
 
