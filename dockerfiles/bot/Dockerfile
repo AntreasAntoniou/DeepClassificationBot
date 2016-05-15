@@ -7,5 +7,6 @@ COPY bot.py gceutil.py data.py deploy.py model.py /opt/bot/
 COPY data /opt/bot/data
 COPY pre_trained_weights /opt/bot/pre_trained_weights
 COPY etc/supervisord.conf /etc/supervisord.conf
+COPY etc/supervisord /etc/supervisord
 
 ENTRYPOINT ["/usr/local/bin/supervisord"]
