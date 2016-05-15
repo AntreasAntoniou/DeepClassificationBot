@@ -51,11 +51,6 @@ $ google_image_scraper.py -n 200 yourfilehere.csv
 2. Have your script create a .csv file with the categories you require.
 3. Then run `python google_image_scraper.py yourfilehere.csv`
 
-
-##### Note: Some information on google_image_scraper.py
-
-When downloading images make sure you set the number of images to the number of images per class, we suggest a number between 200-1000.
-
 ### To extract and preprocess data ready for training
 
 1. Once you have your data ready, run `python train.py extract_data` to get all of your data ready and saved in HDF5 files.
@@ -93,7 +88,7 @@ _________________________________________________
 
 ## Twitter bot
 
-`bot.py` provides a Twitter bot that provides an interface for querying the classifier.
+`bot.py` is a Twitter bot that provides an interface for querying the classifier.
 
 ### Running the bot locally
 
@@ -152,7 +147,7 @@ When you've registered your own image, update the `image` value in `etc/containe
 
 #### Creating and deleting your instance
 
-`tasks.py` provides a handy shortcut for creating a small instance
+`tasks.py` provides a handy shortcut for creating an instance
 with the Docker image specified in `etc/containers.yaml`.
 Twitter credentials are pulled from `bot.ini` and stored as instance metadata.
 
