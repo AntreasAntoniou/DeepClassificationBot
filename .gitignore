@@ -52,8 +52,8 @@ bot.ini
 /_steps/
 !/data/README.md
 /data/*
-/downloaded_images/README.md
-!/downloaded_images/*
+!/downloaded_images/README.md
+/downloaded_images/*
 /etc/supervisord/*.conf
 !/pre_trained_weights/README.md
 /pre_trained_weights/*

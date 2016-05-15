@@ -9,20 +9,16 @@ from __future__ import division
 
 import time
 import random
-import os
+import math
 import functools
 import logging
-import urllib
-import urllib2
 from multiprocessing import TimeoutError
 import multiprocessing.pool
 
-import cStringIO
 import cv2
 import h5py
 import requests
 import tweepy
-from scipy import ndimage
 
 import data
 import deploy
@@ -30,6 +26,7 @@ import gceutil
 import numpy as np
 
 INPUT_SHAPE = 128  # change it to your input image size
+TWEET_MAX_LENGTH = 140
 logging.basicConfig()
 logger = logging.getLogger('bot')
 logger.setLevel(logging.INFO)
@@ -83,18 +80,16 @@ class MockClassifier(object):
 
 class ImageClassifier(object):
     def __init__(self, dataset_path):
+        catname_to_categories = data.get_categories()
+        self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
+        self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=len(catname_to_categories))
+
         dataset = h5py.File(dataset_path, "r")
         self.average_image = dataset['mean'][:]
 
-        n_categories = dataset['n_categories'].value
-        self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=n_categories)
-
-        catname_to_categories = data.get_categories()
-        self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
-
     def classify(self, cvimage):
-        normalized = normalize_cvimage(cvimage, mean=self.average_image)
-        return deploy.apply_model(normalized, self.model, self.category_to_catnames, multi=False)
+        normalized = deploy.normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=self.average_image)
+        return deploy.apply_model(normalized, self.model, self.category_to_catnames)
 
 
 def at_random(*messages):
@@ -102,6 +97,8 @@ def at_random(*messages):
 
 
 class Messages(object):
+    '''Each method is expected to return a message of length under TWEET_MAX_LENGTH.
+    '''
     @staticmethod
     def took_too_long():
         return at_random(
@@ -129,22 +126,54 @@ class Messages(object):
         )
 
     @classmethod
-    def my_guess(cls, y):
-        if len(y):
-            output = "\nProbable Anime: \n"
-            for i in range(3):
-                output += "{}. {}\n".format(i + 1, y[i])
-            return output
-        else:
+    def my_guess(cls, y, top_n=3, max_length=TWEET_MAX_LENGTH, preface="Probable Anime:"):
+        if not len(y):
             return cls.unknown_image()
+
+        pred_lines = []
+        max_category_length = 0
+        max_category_length_index = 0
+
+        for i, pred in enumerate(y[:top_n]):
+            pred_lines.append(deploy.Prediction(
+                "{}.".format(pred.rank),
+                pred.category,
+                "{:.2%}".format(pred.probability),
+            ))
+            if max_category_length < len(pred.category):
+                max_category_length_index = i
+                max_category_length = len(pred.category)
+
+        newline_count = len(pred_lines)
+        pred_length = sum(sum(map(len, pred)) + len(pred) - 1 for pred in pred_lines)
+        current_length = len(preface) + newline_count + pred_length
+
+        # truncate category name(s) if needed
+        if current_length > max_length:
+            lengthy_pred = pred_lines[max_category_length_index]
+            excess_length = current_length - max_length
+            # don't penalize the longest category if it's going to be truncated too much
+            if len(lengthy_pred.category) * 0.5 < excess_length:
+                subtract_from_everyone_length = int(math.ceil(excess_length / len(pred_lines)))
+                pred_lines = [
+                    deploy.Prediction(
+                        pred.rank, pred.category[:-subtract_from_everyone_length], pred.probability)
+                    for pred in pred_lines]
+            else:
+                shortened_pred = deploy.Prediction(
+                    lengthy_pred.rank, lengthy_pred.category[:-excess_length], lengthy_pred.probability)
+                pred_lines[max_category_length_index] = shortened_pred
+
+        reply = "{}\n{}".format(preface, "\n".join(" ".join(pred) for pred in pred_lines))
+        return reply[:max_length]
 
 
 class StatusMessages(Messages):
     @staticmethod
     def give_me_an_image():
         return at_random(
-            'Give me an image URL or attach it to your tweet',
-            "I don't see an image. Tweet an image URL or attach it please",
+            'Give me a direct image URL or attach it to your tweet',
+            "I don't see an image. Tweet a direct image URL or attach it please",
         )
 
 
@@ -152,16 +181,17 @@ class DMMessages(Messages):
     @staticmethod
     def give_me_an_image():
         return at_random(
-            'Give me an image URL',
-            "I don't see an image. Message me an image URL please",
+            'Give me a direct image URL',
+            "I don't see an image. Message me a direct image URL please",
         )
 
 
 class ReplyToTweet(tweepy.StreamListener):
-    def __init__(self, screen_name, classifier, api=None):
+    def __init__(self, screen_name, classifier, api=None, silent=False):
         super(ReplyToTweet, self).__init__(api)
         self.screen_name = screen_name
         self.classifier = classifier
+        self.silent = silent
 
     @wait_like_a_human
     def on_direct_message(self, data):
@@ -173,7 +203,9 @@ class ReplyToTweet(tweepy.StreamListener):
 
         logger.debug(u"{0} incoming dm {1}".format(status['id'], status['text']))
 
-        reply = self.get_reply(status['id'], status['entities'], DMMessages)
+        reply = self.get_reply(status['id'], status['entities'], TWEET_MAX_LENGTH - len('d {} '.format(sender_name)), DMMessages)
+        if self.silent:
+            return
         return self.api, 'send_direct_message', tuple(), dict(user_id=status['sender']['id'], text=reply)
 
     @wait_like_a_human
@@ -192,11 +224,14 @@ class ReplyToTweet(tweepy.StreamListener):
             logger.debug("{0} doesn't mention {1}".format(status.id, self.screen_name))
             return
 
-        reply = self.get_reply(status.id, status.entities, StatusMessages)
-        status_text = '@{0} {1}'.format(sender_name, reply)
+        prefix = '@{0} '.format(sender_name)
+        reply = self.get_reply(status.id, status.entities, TWEET_MAX_LENGTH - len(prefix), StatusMessages)
+        status_text = prefix + reply
+        if self.silent:
+            return
         return self.api, 'update_status', (status_text,), dict(in_reply_to_status_id=status.id)
 
-    def get_reply(self, status_id, entities, messages):
+    def get_reply(self, status_id, entities, max_length, messages):
         maybe_image_url = url_from_entities(entities)
 
         if not maybe_image_url:
@@ -217,7 +252,7 @@ class ReplyToTweet(tweepy.StreamListener):
             return messages.not_an_image()
 
         y = self.classifier.classify(cvimage)
-        reply = messages.my_guess(y)
+        reply = messages.my_guess(y, max_length)
         logger.debug("{0} reply: {1}".format(status_id, reply))
         return reply
 
@@ -252,7 +287,6 @@ def url_from_entities(entities):
 
 @timeout(30)
 def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
-
     req = requests.get(url, timeout=5, stream=True)
     content = ''
     for chunk in req.iter_content(2048):
@@ -261,14 +295,6 @@ def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
     cv2_img_flag = cv2.CV_LOAD_IMAGE_COLOR
     image = cv2.imdecode(img_array, cv2_img_flag)
     return image
-
-
-# TODO: move to deploy.py (see get_data_from_file)
-def normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=None):
-    result = data.resize(cvimage, size)
-    if mean is not None:
-        result = result - mean
-    return result / 255
 
 
 def main(args):
@@ -285,7 +311,7 @@ def main(args):
     else:
         classifier = ImageClassifier(args.dataset_path)
 
-    stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api))
+    stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api, args.silent))
     logger.info('Listening as {}'.format(screen_name))
     stream.userstream(track=[screen_name])
 
@@ -302,6 +328,7 @@ if __name__ == '__main__':
     parser.add('--access-token-secret', required=True, env_var='ACCESS_TOKEN_SECRET', help='Twitter access token secret')
     parser.add('--dataset-path', default='data/data.hdf5')
     parser.add('--mock', action='store_true', default=False, help='Test bot without model data')
+    parser.add('--silent', action='store_true', default=False, help='Test bot without actually replying')
     parser.add('--debug', action='store_true', default=False, help='Set log level to debug')
 
     try:
