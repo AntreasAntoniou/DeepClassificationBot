@@ -184,6 +184,10 @@ class ReplyToTweet(tweepy.StreamListener):
 
         logger.debug(u"{0} incoming status {1}".format(status.id, status.text))
 
+        if retweets_me(status, self.screen_name):
+            logger.debug("{0} is a retweet".format(status.id))
+            return
+
         if not status_mentions(status, self.screen_name):
             logger.debug("{0} doesn't mention {1}".format(status.id, self.screen_name))
             return
@@ -222,6 +226,13 @@ class ReplyToTweet(tweepy.StreamListener):
             # we are rate-limited.
             # returning False disconnects the stream
             return False
+
+
+def retweets_me(status, screen_name):
+    retweeted_status = getattr(status, 'retweeted_status', None)
+    if retweeted_status is None:
+        return False
+    return retweeted_status.author.screen_name == screen_name
 
 
 def status_mentions(status, screen_name):

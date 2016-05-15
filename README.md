@@ -70,8 +70,8 @@ When downloading images make sure you set the number of images to the number of 
 
 1. Once your training has finished and a good model has been trained then you can deploy your model.
 2. To deploy a model on a single URL image use `python deploy.py --URL [URL_LINK]`
-3. To deploy a model on a folder full of images use `python deploy -image_folder path/to/folder`
-4. To deploy a model on a single file use `python deploy -image_file path/to/file`
+3. To deploy a model on a folder full of images use `python deploy --image-folder path/to/folder`
+4. To deploy a model on a single file use `python deploy --image-path path/to/file`
 
 Once deployed the model should return the top 5 predictions on each image in a nice string formatted view: e.g.
 

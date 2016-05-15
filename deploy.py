@@ -109,10 +109,10 @@ if __name__ == '__main__':
         test_image_path = "downloaded_images/" + str(bits[-1])
         urllib.urlretrieve(link, test_image_path)
         image = True
-    elif sys.argv[1] == "--image_path":
+    elif sys.argv[1] == "--image-path":
         test_image_path = str(sys.argv[2])
         image = True
-    elif sys.argv[1] == "--image_folder":
+    elif sys.argv[1] == "--image-folder":
         test_image_folder = sys.argv[2]
         folder = True
 
