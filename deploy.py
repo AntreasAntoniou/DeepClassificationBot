@@ -107,15 +107,12 @@ if __name__ == '__main__':
         test_image_folder = sys.argv[2]
         folder = True
 
-    categories = data.get_categories()
-    categories_to_strings = dict()
-
-    for key in categories.iterkeys():
-        categories_to_strings[categories[key]] = key
+    catname_to_categories = data.get_categories()
+    category_to_catnames = {v: k for k, v in catname_to_categories.items()}
 
     # this should be run once and kept in memory for all predictions
     # as re-loading it is very time consuming
-    model = load_model(input_shape=image_size, n_outputs=len(categories))
+    model = load_model(input_shape=image_size, n_outputs=len(category_to_catnames))
 
     if folder:
         images, names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
@@ -125,7 +122,7 @@ if __name__ == '__main__':
         names = [name]
 
     for image, name in zip(images, names):
-        y = apply_model(image, model, categories_to_strings)
+        y = apply_model(image, model, category_to_catnames)
         print("______________________________________________")
         print("Image Name: {}".format(name))
         print("Categories: ")
