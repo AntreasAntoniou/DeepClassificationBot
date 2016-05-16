@@ -1,15 +1,17 @@
+'''
+Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader,
+which we adapted for our project. Special thanks to shuvronewscred for his project.
+'''
+    
 from __future__ import absolute_import
 from __future__ import print_function
 import os
 import time
 import re
 import socket
+
 from selenium import webdriver
 from pattern.web import URL, DOM
-
-
-'''Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader adapted for our project
-    Special thanks to shuvronewscred for his project'''
 
 
 class GoogleImageExtractor(object):
