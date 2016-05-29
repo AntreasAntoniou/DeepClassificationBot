@@ -7,46 +7,26 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import time
-import random
-import math
 import functools
+import math
 import logging
-from multiprocessing import TimeoutError
-import multiprocessing.pool
+import random
+import time
 
-import cv2
-import h5py
-import requests
 import tweepy
 
-import data
 import deploy
 import gceutil
-import numpy as np
+from deepanimebot import classifiers
+from deepanimebot import exceptions as exc
+from deepanimebot.shortcuts import at_random
+
 
 INPUT_SHAPE = 128  # change it to your input image size
 TWEET_MAX_LENGTH = 140
 logging.basicConfig()
 logger = logging.getLogger('bot')
 logger.setLevel(logging.INFO)
-
-
-# courtesy of http://stackoverflow.com/a/35139284/20226
-def timeout(max_timeout):
-    """Timeout decorator, parameter in seconds."""
-    def timeout_decorator(f):
-        """Wrap the original function."""
-        @functools.wraps(f)
-        def func_wrapper(self, *args, **kwargs):
-            """Closure for function."""
-            pool = multiprocessing.pool.ThreadPool(processes=1)
-            async_result = pool.apply_async(f, (self,) + args, kwargs)
-            timeout = kwargs.pop('timeout_max_timeout', max_timeout) or max_timeout
-            # raises a TimeoutError if execution exceeds max_timeout
-            return async_result.get(timeout)
-        return func_wrapper
-    return timeout_decorator
 
 
 def wait_like_a_human(f):
@@ -66,34 +46,6 @@ def wait_like_a_human(f):
 
         return getattr(api, action)(*args, **kwargs)
     return wrapper
-
-
-class MockClassifier(object):
-    def classify(self, *args, **kwargs):
-        return at_random(
-            "I hope a mock message like this won't get caught by Twitter's spam filter",
-            "But I must explain to you how all this mistaken idea was born",
-            "At vero eos et accusamus et iusto odio dignissimos ducimus qui blanditiis",
-            "Excepteur sint occaecat cupidatat non proident",
-        )
-
-
-class ImageClassifier(object):
-    def __init__(self, dataset_path):
-        catname_to_categories = data.get_categories()
-        self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
-        self.model = deploy.load_model(input_shape=INPUT_SHAPE, n_outputs=len(catname_to_categories))
-
-        dataset = h5py.File(dataset_path, "r")
-        self.average_image = dataset['mean'][:]
-
-    def classify(self, cvimage):
-        normalized = deploy.normalize_cvimage(cvimage, size=INPUT_SHAPE, mean=self.average_image)
-        return deploy.apply_model(normalized, self.model, self.category_to_catnames)
-
-
-def at_random(*messages):
-    return random.choice(messages)
 
 
 class Messages(object):
@@ -239,19 +191,17 @@ class ReplyToTweet(tweepy.StreamListener):
             return messages.give_me_an_image()
 
         try:
-            cvimage = fetch_cvimage_from_url(maybe_image_url)
+            y = self.classifier.classify(maybe_image_url)
         except TimeoutError:
-            logger.debug("{0} timed out while fetching {1}".format(status_id, maybe_image_url))
+            logger.debug("{0} timed out while classifying {1}".format(status_id, maybe_image_url))
             return messages.took_too_long()
-        except Exception as e:
-            logger.error("{0} error while fetching {1}: {2}".format(status_id, maybe_image_url, e))
-            return messages.something_went_wrong()
-
-        if cvimage is None:
+        except exc.NotImage:
             logger.debug("{0} no image found at {1}".format(status_id, maybe_image_url))
             return messages.not_an_image()
+        except Exception as e:
+            logger.error("{0} error while classifying {1}: {2}".format(status_id, maybe_image_url, e))
+            return messages.something_went_wrong()
 
-        y = self.classifier.classify(cvimage)
         reply = messages.my_guess(y, max_length)
         logger.debug("{0} reply: {1}".format(status_id, reply))
         return reply
@@ -285,18 +235,6 @@ def url_from_entities(entities):
         return url['expanded_url']
 
 
-@timeout(30)
-def fetch_cvimage_from_url(url, maxsize=10 * 1024 * 1024):
-    req = requests.get(url, timeout=5, stream=True)
-    content = ''
-    for chunk in req.iter_content(2048):
-        content += chunk
-    img_array = np.asarray(bytearray(content), dtype=np.uint8)
-    cv2_img_flag = cv2.CV_LOAD_IMAGE_COLOR
-    image = cv2.imdecode(img_array, cv2_img_flag)
-    return image
-
-
 def main(args):
     if args.debug:
         logger.setLevel(logging.DEBUG)
@@ -307,9 +245,9 @@ def main(args):
     screen_name = api.me().screen_name
 
     if args.mock:
-        classifier = MockClassifier()
+        classifier = classifiers.MockClassifier()
     else:
-        classifier = ImageClassifier(args.dataset_path)
+        classifier = classifiers.URLClassifier(classifiers.ImageClassifier(args.dataset_path, INPUT_SHAPE))
 
     stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api, args.silent))
     logger.info('Listening as {}'.format(screen_name))
