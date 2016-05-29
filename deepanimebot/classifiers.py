@@ -9,6 +9,7 @@ import data
 import deploy
 
 from .decorators import timeout
+from . import exceptions as exc
 from .shortcuts import at_random
 
 
@@ -62,6 +63,6 @@ class URLClassifier(object):
         cvimage = fetch_cvimage_from_url(maybe_image_url)
 
         if cvimage is None:
-            raise exc.NotImage(url)
+            raise exc.NotImage(maybe_image_url)
 
         return self._image_classifier.classify(cvimage)

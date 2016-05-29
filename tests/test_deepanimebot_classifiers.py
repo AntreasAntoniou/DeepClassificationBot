@@ -12,6 +12,7 @@ import six
 import deploy
 import data
 from deepanimebot import classifiers
+from deepanimebot import exceptions as exc
 import mocks
 
 
@@ -65,16 +66,27 @@ def test_image_classifier_classify(monkeypatch):
     assert isinstance(y[0], deploy.Prediction)
 
 
-def test_url_classifier_classify(monkeypatch):
-    with open(TEST_IMAGE_PATH, 'rb') as f:
-        image = f.read()
-    monkeypatch.setattr(requests, 'get', mocks.mock_get(image))
+def create_url_classifier(monkeypatch):
     # TODO: add fixture for categories and mean. (95 is a magic number corresponding to the deployed model)
     monkeypatch.setattr(data, 'get_categories', lambda: dict((str(n), n) for n in range(95)))
     monkeypatch.setattr(data, 'get_mean', lambda path: None)
     # TODO: add fixture for weights and refactor so that model is loaded from a workspace directory
     image_classifier = classifiers.ImageClassifier('ignored path', 128, 'deep_anime_model')
-    url_classifier = classifiers.URLClassifier(image_classifier)
+    return classifiers.URLClassifier(image_classifier)
+
+
+def test_url_classifier_classify(monkeypatch):
+    with open(TEST_IMAGE_PATH, 'rb') as f:
+        image = f.read()
+    monkeypatch.setattr(requests, 'get', mocks.mock_get(image))
+    url_classifier = create_url_classifier(monkeypatch)
     y = url_classifier.classify(TEST_IMAGE_PATH)
     assert isinstance(y, list)
     assert isinstance(y[0], deploy.Prediction)
+
+
+def test_url_classifier_classify_none(monkeypatch):
+    monkeypatch.setattr(classifiers, 'fetch_cvimage_from_url', lambda url: None)
+    url_classifier = create_url_classifier(monkeypatch)
+    with pytest.raises(exc.NotImage):
+        url_classifier.classify(TEST_IMAGE_PATH)
