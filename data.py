@@ -107,8 +107,11 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
 
 
 def get_mean(dataset_path='data/data.hf5'):
-    h5f = h5py.File(dataset_path, 'r')
-    return h5f['mean'][:]
+    try:
+        h5f = h5py.File(dataset_path, 'r')
+        return h5f['mean'][:]
+    except IOError:
+        return np.load("data/mean.npy")
 
 
 def get_categories():
