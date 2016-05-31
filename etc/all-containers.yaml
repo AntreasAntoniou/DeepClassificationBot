@@ -1,0 +1,84 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: bot-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: bot
+    spec:
+      containers:
+      - name: bot-remote
+        image: docker.io/classificationbot/bot-remote:0.1.3
+        args:
+          - --debug
+          - --classifier=remote
+          - --remote-endpoint=http://webapp-service/api/v1/deepanimebot/classify_by_url
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+          requests:
+            cpu: 50m
+            memory: 100Mi
+        env:
+          - name: CONSUMER_KEY
+            valueFrom:
+              secretKeyRef:
+                name: bot-secrets
+                key: consumer-key
+          - name: CONSUMER_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: bot-secrets
+                key: consumer-secret
+          - name: ACCESS_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: bot-secrets
+                key: access-token
+          - name: ACCESS_TOKEN_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: bot-secrets
+                key: access-token-secret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webapp-service
+  labels:
+    app: webapp
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: webapp
+  type: LoadBalancer
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: webapp
+    spec:
+      containers:
+      - name: webapp
+        image: docker.io/classificationbot/webapp:0.1.3
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 1000Mi
+          requests:
+            cpu: 180m
+            memory: 400Mi
+        ports:
+          - containerPort: 80

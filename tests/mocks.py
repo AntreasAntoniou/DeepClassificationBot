@@ -2,6 +2,7 @@
 import collections
 from functools import partial
 from StringIO import StringIO
+import json
 
 
 def mock_get(content):
@@ -16,3 +17,6 @@ class MockResponse(collections.namedtuple('Response', 'content')):
 
     def close(self):
         pass
+
+    def json(self):
+        return json.loads(self.content)

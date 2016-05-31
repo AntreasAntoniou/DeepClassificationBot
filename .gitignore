@@ -52,6 +52,7 @@ bot.ini
 /_steps/
 !/data/README.md
 /data/*
+/etc/bot-secrets.yaml
 !/downloaded_images/README.md
 /downloaded_images/*
 /etc/supervisord/*.conf

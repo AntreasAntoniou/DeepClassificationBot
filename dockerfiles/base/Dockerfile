@@ -4,7 +4,7 @@ FROM kaixhin/theano:latest
 # (in order to copy requirements.txt)
 
 ENV DEBIAN_FRONTEND noninteractive
-RUN apt-get update && apt-get install -y libffi-dev libssl-dev libhdf5-dev language-pack-en-base python-pandas python-opencv python-numpy
+RUN apt-get update && apt-get install -y libffi-dev libssl-dev libhdf5-dev language-pack-en-base python-pandas python-opencv python-numpy python-h5py
 
 COPY ./requirements.txt /tmp/
 RUN pip install -r /tmp/requirements.txt

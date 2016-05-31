@@ -14,7 +14,7 @@ from temporary import temp_dir
 import click
 
 
-DEFAULT_INSTANCE_NAME = 'bot'
+DEFAULT_INSTANCE_NAME = 'bot-standalone'
 DEFAULT_ZONE = 'us-central1-a'
 DEFAULT_MACHINE_TYPE = 'f1-micro'
 LOGGING_AGENT_INSTALL_SCRIPT = 'https://dl.google.com/cloudagents/install-logging-agent.sh'
@@ -26,6 +26,33 @@ def bot():
 
 
 @bot.command()
+@click.argument('version')
+def build_and_push_images(version):
+    images = ['deploy-base', 'bot-remote', 'webapp']
+    for image_name in images:
+        version_tag = 'classificationbot/{}:{}'.format(image_name, version)
+        latest_tag = 'classificationbot/{}:latest'.format(image_name)
+        args = [
+            'docker',
+            'build',
+            '-t',
+            version_tag,
+            '-t',
+            latest_tag,
+            '-f',
+            'dockerfiles/{}/Dockerfile'.format(image_name),
+            '.']
+        subprocess.call(args)
+        for tag in [version_tag, latest_tag]:
+            args = [
+                'docker',
+                'push',
+                tag
+            ]
+            subprocess.call(args)
+
+
+@bot.command()
 @click.option('--name', default=DEFAULT_INSTANCE_NAME)
 @click.option('--zone', default=DEFAULT_ZONE)
 @click.option('--machine-type', default=DEFAULT_MACHINE_TYPE)
@@ -33,7 +60,7 @@ def bot():
 @click.option('--bot-config', default='bot.ini')
 @click.option('--stackdriver-logging/--no-stackdriver-logging', default=False, help='Install logging agent and add config to collect logs')
 @click.pass_context
-def create_instance(ctx, name, zone, machine_type, address, bot_config, stackdriver_logging):
+def create_standalone_instance(ctx, name, zone, machine_type, address, bot_config, stackdriver_logging):
     args = [
         'gcloud', 'compute', 'instances', 'create', name,
         '--image', 'container-vm',
@@ -56,7 +83,7 @@ def create_instance(ctx, name, zone, machine_type, address, bot_config, stackdri
     with temp_dir() as d:
         # add metadata from file
         args.append('--metadata-from-file')
-        metadata_files = ['google-container-manifest=etc/containers.yaml']
+        metadata_files = ['google-container-manifest=etc/standalone-bot-containers.yaml']
         startup_script_path = os.path.join(d, 'startup-script.sh')
         if stackdriver_logging:
             urllib.urlretrieve(LOGGING_AGENT_INSTALL_SCRIPT, startup_script_path)
@@ -99,7 +126,7 @@ def copy_fluentd_conf(name, zone):
 @bot.command()
 @click.option('--name', default=DEFAULT_INSTANCE_NAME)
 @click.option('--zone', default=DEFAULT_ZONE)
-def delete_instance(name, zone):
+def delete_standalone_instance(name, zone):
     args = [
         'gcloud', 'compute', 'instances', 'delete', name,
         '--zone', zone,

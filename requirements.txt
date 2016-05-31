@@ -1,14 +1,12 @@
-ConfigArgParse==0.10.0
 Keras==1.0.2
 Pattern==2.6
 Theano==0.8.0.dev0 # kaixhin/theano:latest
 backports.csv==1.0.1
 click==6.6
-h5py==2.6.0
+h5py>=2.2.1,<=2.6.0 # trusty:python-h5py
 ndg-httpsclient==0.4.0
 numpy==1.8.2 # trusty:python-numpy
 pandas==0.13.1 # trusty:python-pandas
 requests==2.9.1
 selenium==2.51.1
-tweepy==3.5.0
 wsgiref==0.1.2
