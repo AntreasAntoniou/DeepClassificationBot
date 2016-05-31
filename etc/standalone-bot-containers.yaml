@@ -5,7 +5,7 @@ metadata:
 spec:
   containers:
     - name: classificationbot
-      image: docker.io/classificationbot/bot
+      image: docker.io/classificationbot/bot-standalone
       imagePullPolicy: Always
       ports:
         - containerPort: 9001

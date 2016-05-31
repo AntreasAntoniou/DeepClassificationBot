@@ -88,7 +88,7 @@ _________________________________________________
 
 ## Twitter bot
 
-`bot.py` is a Twitter bot that provides an interface for querying the classifier.
+`deepanimebot/bot.py` is a Twitter bot that provides an interface for querying the classifier.
 
 ### Running the bot locally
 
@@ -104,10 +104,10 @@ Copy `bot.ini.example` to `bot.ini` and overwrite with your key/secret and token
 #### Run it
 
 ```
-$ python bot.py -c bot.ini --debug
+$ python deepanimebot/bot.py -c bot.ini --debug
 ```
 
-`python bot.py --help` will list all available command line options.
+`python deepanimebot/bot.py --help` will list all available command line options.
 
 ### Deploying to Google Compute Engine
 
@@ -139,21 +139,21 @@ $ docker push classificationbot/base:latest
 $ docker build -t classificationbot/ci:latest -f dockerfiles/ci/Dockerfile .
 $ docker push classificationbot/ci:latest
 
-$ docker build -t classificationbot/bot:latest -f dockerfiles/bot/Dockerfile .
-$ docker push classificationbot/bot:latest
+$ docker build -t classificationbot/bot-standalone:latest -f dockerfiles/bot-standalone/Dockerfile .
+$ docker push classificationbot/bot-standalone:latest
 ```
 
-When you've registered your own image, update the `image` value in `etc/containers.yaml`.
+When you've registered your own image, update the `image` value in `etc/standalone-bot-containers.yaml`.
 
 #### Creating and deleting your instance
 
 `tasks.py` provides a handy shortcut for creating an instance
-with the Docker image specified in `etc/containers.yaml`.
+with the Docker image specified in `etc/standalone-bot-containers.yaml`.
 Twitter credentials are pulled from `bot.ini` and stored as instance metadata.
 
 ```
-$ python tasks.py create_instance
-$ python tasks.py delete_instance
+$ python tasks.py create_standalone_instance
+$ python tasks.py delete_standalone_instance
 ```
 
 #### When something goes wrong
@@ -162,7 +162,7 @@ Or when you want to see if it's working for yourself:
 
 ```
 ## SSH into your instance
-$ gcloud compute ssh --zone us-central1-a bot
+$ gcloud compute ssh --zone us-central1-a bot-standalone
 
 ## Wait until our container comes up:
 you@bot:~$ sudo watch docker ps
