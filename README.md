@@ -104,17 +104,25 @@ Copy `bot.ini.example` to `bot.ini` and overwrite with your consumer key/secret 
 #### Run it
 
 ```
-$ PYTHONPATH=. python deepanimebot/bot.py -c bot.ini --debug
+$ PYTHONPATH=. python deepanimebot/bot.py -c bot.ini --debug --classifier=local
 ```
 
 `python deepanimebot/bot.py --help` will list all available command line options.
 
-### Deploying to Google Compute Engine
+## Web interface
 
-This repo comes with the necessary support files for deploying the Twitter bot
-to a dedicated GCE container-optimized instance.
+`deepanimebot/webapp.py` is a Flask app for querying the classifier.
 
-#### Prerequisites
+```
+$ PYTHONPATH=. python deepanimebot/webapp.py
+```
+
+## Deploying to Google Cloud Platform
+
+This repo comes with the necessary support files for deploying the Twitter bot and/or the web app
+to Google Cloud Platform.
+
+### Prerequisites
 
 * A classifier
 * Twitter app credentials (see above)
@@ -122,7 +130,7 @@ to a dedicated GCE container-optimized instance.
 * [Google Cloud SDK](https://cloud.google.com/sdk/#Quick_Start)
 * [A Google Cloud Platform project](https://cloud.google.com/compute/docs/linux-quickstart#set_up_a_google_cloud_platform_project)
 
-#### Building and registering your own docker image
+### Building and registering your own Docker image
 
 `classificationbot/base:latest` comes with all the dependencies installed.
 If you've modified the code and added a new dependency,
@@ -139,11 +147,11 @@ $ docker push classificationbot/ci:latest
 
 ```
 
-#### Deploying
+### Deploying
 
 There are two options:
 
-1. (Not used anymore) Google Compute Engine, container-optimized VM, supervisord + tweepy: [bot-standalone](./bot-standalone/)
+1. (Not used anymore) Google Compute Engine, container-optimized instance, supervisord + tweepy: [bot-standalone](./bot-standalone/)
 2. Google Container Engine, kubernetes, gunicorn + flask + tweepy: [follow this gist](https://gist.github.com/ento/3529a4fae8771e4e87e62370e6d25236)
 
 
