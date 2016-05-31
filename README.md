@@ -151,7 +151,7 @@ $ docker push classificationbot/ci:latest
 
 There are two options:
 
-1. (Not used anymore) Google Compute Engine, container-optimized instance, supervisord + tweepy: [bot-standalone](./bot-standalone/)
+1. (Not used anymore) Google Compute Engine, container-optimized instance, supervisord + tweepy: [bot-standalone](./dockerfiles/bot-standalone/)
 2. Google Container Engine, kubernetes, gunicorn + flask + tweepy: [follow this gist](https://gist.github.com/ento/3529a4fae8771e4e87e62370e6d25236)
 
 
