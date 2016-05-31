@@ -101,13 +101,16 @@ class ReplyToTweet(tweepy.StreamListener):
             return messages.give_me_an_image()
 
         try:
-            y = self.classifier.classify(maybe_image_url)
-        except TimeoutError:
+            y = self.classifier.classify(url=maybe_image_url)
+        except exc.TimeoutError:
             logger.debug("{0} timed out while classifying {1}".format(status_id, maybe_image_url))
             return messages.took_too_long()
         except exc.NotImage:
             logger.debug("{0} no image found at {1}".format(status_id, maybe_image_url))
             return messages.not_an_image()
+        except exc.RemoteError as e:
+            logger.debug("{0} remote error {1}".format(status_id, e))
+            return e.message
         except Exception as e:
             logger.error("{0} error while classifying {1}: {2}".format(status_id, maybe_image_url, e))
             return messages.something_went_wrong()
@@ -154,10 +157,12 @@ def main(args):
     api = tweepy.API(auth, wait_on_rate_limit=True)
     screen_name = api.me().screen_name
 
-    if args.mock:
+    if args.classifier == 'mock':
         classifier = classifiers.MockClassifier()
-    else:
+    elif args.classifier == 'local':
         classifier = classifiers.URLClassifier(classifiers.ImageClassifier(args.dataset_path, INPUT_SHAPE))
+    elif args.classifier == 'remote':
+        classifier = classifiers.RemoteClassifier(args.remote_endpoint)
 
     stream = tweepy.Stream(auth=auth, listener=ReplyToTweet(screen_name, classifier, api, args.silent))
     logger.info('Listening as {}'.format(screen_name))
@@ -174,9 +179,10 @@ if __name__ == '__main__':
     parser.add('--consumer-secret', required=True, env_var='CONSUMER_SECRET', help='Twitter app consumer secret')
     parser.add('--access-token', required=True, env_var='ACCESS_TOKEN', help='Twitter access token')
     parser.add('--access-token-secret', required=True, env_var='ACCESS_TOKEN_SECRET', help='Twitter access token secret')
-    parser.add('--dataset-path', default='data/data.hdf5')
-    parser.add('--mock', action='store_true', default=False, help='Test bot without model data')
-    parser.add('--silent', action='store_true', default=False, help='Test bot without actually replying')
+    parser.add('--classifier', choices=['mock', 'local', 'remote'], default='mock', help='Which classifier to use')
+    parser.add('--dataset-path', default='data/data.hdf5', help='Path to dataset when using a local calssifier')
+    parser.add('--remote-endpoint', default=None, help='API endpoint to call when using a remote classifier')
+    parser.add('--silent', action='store_true', default=False, help='Run bot without actually replying')
     parser.add('--debug', action='store_true', default=False, help='Set log level to debug')
 
     try:

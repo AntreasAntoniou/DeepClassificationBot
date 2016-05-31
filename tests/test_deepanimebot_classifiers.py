@@ -2,6 +2,7 @@
 import os
 import time
 from multiprocessing import TimeoutError
+import json
 
 import h5py
 import cv2
@@ -90,3 +91,20 @@ def test_url_classifier_classify_none(monkeypatch):
     url_classifier = create_url_classifier(monkeypatch)
     with pytest.raises(exc.NotImage):
         url_classifier.classify(TEST_IMAGE_PATH)
+
+
+def test_remote_classifier_classify(monkeypatch):
+    response = json.dumps(dict(y=[dict(rank=1, category='noein', probability=1.0)]))
+    monkeypatch.setattr(requests, 'get', mocks.mock_get(response))
+    classifier = classifiers.RemoteClassifier('base url')
+    y = classifier.classify(url='param')
+    assert isinstance(y, list)
+    assert isinstance(y[0], deploy.Prediction)
+
+
+def test_remote_classifier_classify(monkeypatch):
+    response = json.dumps(dict(error='something went wrong expectedly'))
+    monkeypatch.setattr(requests, 'get', mocks.mock_get(response))
+    classifier = classifiers.RemoteClassifier('base url')
+    with pytest.raises(exc.RemoteError):
+        classifier.classify(url='param')

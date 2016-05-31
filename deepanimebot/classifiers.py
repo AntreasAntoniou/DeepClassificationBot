@@ -59,10 +59,24 @@ class URLClassifier(object):
     def __init__(self, image_classifier):
         self._image_classifier = image_classifier
 
-    def classify(self, maybe_image_url):
-        cvimage = fetch_cvimage_from_url(maybe_image_url)
+    def classify(self, url=None):
+        cvimage = fetch_cvimage_from_url(url)
 
         if cvimage is None:
-            raise exc.NotImage(maybe_image_url)
+            raise exc.NotImage(url)
 
         return self._image_classifier.classify(cvimage)
+
+
+class RemoteClassifier(object):
+    def __init__(self, base_url):
+        self._base_url = base_url
+
+    def classify(self, **params):
+        try:
+            r = requests.get(self._base_url, params=params, timeout=60).json()
+            if 'error' in r:
+                raise exc.RemoteError(r['error'])
+            return map(lambda guess: deploy.Prediction(**guess), r['y'])
+        except requests.exceptions.Timeout:
+            raise exc.TimeoutError
