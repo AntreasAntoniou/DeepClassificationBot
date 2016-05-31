@@ -139,8 +139,17 @@ $ docker push classificationbot/base:latest
 $ docker build -t classificationbot/ci:latest -f dockerfiles/ci/Dockerfile .
 $ docker push classificationbot/ci:latest
 
+$ docker build -t classificationbot/deploy-base:latest -f dockerfiles/deploy-base/Dockerfile .
+$ docker push classificationbot/deploy-base:latest
+
 $ docker build -t classificationbot/bot-standalone:latest -f dockerfiles/bot-standalone/Dockerfile .
 $ docker push classificationbot/bot-standalone:latest
+
+$ docker build -t classificationbot/bot-remote:latest -f dockerfiles/bot-remote/Dockerfile .
+$ docker push classificationbot/bot-remote:latest
+
+$ docker build -t classificationbot/webapp:latest -f dockerfiles/webapp/Dockerfile .
+$ docker push classificationbot/webapp:latest
 ```
 
 When you've registered your own image, update the `image` value in `etc/standalone-bot-containers.yaml`.
@@ -178,7 +187,7 @@ you@bot:~$ sudo docker exec -it $(sudo docker ps --filter=ancestor=classificatio
 
 ## You can run it manually too:
 # cd /opt/bot/
-# python bot.py --mock --debug
+# python deepanimebot/bot.py --mock --debug
 ```
 
 ## Special Thanks

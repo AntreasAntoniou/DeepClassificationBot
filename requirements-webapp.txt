@@ -1,0 +1,5 @@
+-r requirements.txt
+Flask==0.11
+Werkzeug==0.11.10
+gunicorn==19.6.0
+itsdangerous==0.24

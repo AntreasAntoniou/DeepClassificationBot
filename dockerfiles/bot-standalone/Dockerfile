@@ -1,11 +1,9 @@
-# docker build -t classificationbot/bot:latest -f dockerfiles/bot/Dockerfile .
-FROM classificationbot/base:latest
+FROM classificationbot/deploy-base:latest
+
+COPY ./requirements-bot.txt /tmp/
+RUN pip install -r /tmp/requirements-bot.txt
 
 RUN pip install supervisor
-RUN mkdir -p /opt/bot
-COPY bot.py gceutil.py data.py deploy.py model.py /opt/bot/
-COPY data /opt/bot/data
-COPY pre_trained_weights /opt/bot/pre_trained_weights
 COPY etc/supervisord.conf /etc/supervisord.conf
 COPY etc/supervisord /etc/supervisord
 
