@@ -9,6 +9,7 @@ from __future__ import division
 
 import functools
 import logging
+import os
 import random
 import time
 
@@ -182,11 +183,12 @@ if __name__ == '__main__':
         args = parser.parse_args()
     except SystemExit as e:
         if gceutil.detect_gce_environment(logger):
-            attr_env_vars = {action.dest.replace('_', '-'): action.env_var
-                             for action in parser._actions if action.env_var}
-            metadata = gceutil.get_metadata(attr_env_vars.keys())
-            env_vars = {attr_env_vars[attr]: value for attr, value in metadata.items()}
-            args = parser.parse_args(env_vars=env_vars)
+            attrname_env_varnames = {action.dest.replace('_', '-'): action.env_var
+                                     for action in parser._actions if action.env_var}
+            metadata = gceutil.get_metadata(attrname_env_varnames.keys())
+            environ = dict(os.environ)
+            environ.update({attrname_env_varnames[attr]: value for attr, value in metadata.items()})
+            args = parser.parse_args(env_vars=environ)
         else:
             raise
 
