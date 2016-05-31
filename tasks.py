@@ -26,6 +26,33 @@ def bot():
 
 
 @bot.command()
+@click.argument('version')
+def build_and_push_images(version):
+    images = ['deploy-base', 'bot-remote', 'webapp']
+    for image_name in images:
+        version_tag = 'classificationbot/{}:{}'.format(image_name, version)
+        latest_tag = 'classificationbot/{}:latest'.format(image_name)
+        args = [
+            'docker',
+            'build',
+            '-t',
+            version_tag,
+            '-t',
+            latest_tag,
+            '-f',
+            'dockerfiles/{}/Dockerfile'.format(image_name),
+            '.']
+        subprocess.call(args)
+        for tag in [version_tag, latest_tag]:
+            args = [
+                'docker',
+                'push',
+                tag
+            ]
+            subprocess.call(args)
+
+
+@bot.command()
 @click.option('--name', default=DEFAULT_INSTANCE_NAME)
 @click.option('--zone', default=DEFAULT_ZONE)
 @click.option('--machine-type', default=DEFAULT_MACHINE_TYPE)

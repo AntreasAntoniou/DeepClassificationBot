@@ -99,12 +99,12 @@ _________________________________________________
 * Consumer key and secret for that app
 * [Your access token and secret for that app](https://dev.twitter.com/oauth/overview/application-owner-access-tokens)
 
-Copy `bot.ini.example` to `bot.ini` and overwrite with your key/secret and token/secret.
+Copy `bot.ini.example` to `bot.ini` and overwrite with your consumer key/secret and access token/secret.
 
 #### Run it
 
 ```
-$ python deepanimebot/bot.py -c bot.ini --debug
+$ PYTHONPATH=. python deepanimebot/bot.py -c bot.ini --debug
 ```
 
 `python deepanimebot/bot.py --help` will list all available command line options.
@@ -117,20 +117,18 @@ to a dedicated GCE container-optimized instance.
 #### Prerequisites
 
 * A classifier
-* `bot.ini` with Twitter credentials (see above)
+* Twitter app credentials (see above)
 * [Docker](https://www.docker.com/) tools and an account on a docker registry
 * [Google Cloud SDK](https://cloud.google.com/sdk/#Quick_Start)
 * [A Google Cloud Platform project](https://cloud.google.com/compute/docs/linux-quickstart#set_up_a_google_cloud_platform_project)
 
-#### Build and register your own docker image
+#### Building and registering your own docker image
 
 `classificationbot/base:latest` comes with all the dependencies installed.
 If you've modified the code and added a new dependency,
 make a new Docker image based on the dockerfiles in this repo.
 
-`dockerfiles/bot/Dockerfile` will contain the bot and the classifier when built.
-
-This repo's associated images are built with these commands:
+This repo's base images are built with these commands:
 
 ```
 $ docker build -t classificationbot/base:latest -f dockerfiles/base/Dockerfile .
@@ -139,58 +137,18 @@ $ docker push classificationbot/base:latest
 $ docker build -t classificationbot/ci:latest -f dockerfiles/ci/Dockerfile .
 $ docker push classificationbot/ci:latest
 
-$ docker build -t classificationbot/deploy-base:latest -f dockerfiles/deploy-base/Dockerfile .
-$ docker push classificationbot/deploy-base:latest
-
-$ docker build -t classificationbot/bot-standalone:latest -f dockerfiles/bot-standalone/Dockerfile .
-$ docker push classificationbot/bot-standalone:latest
-
-$ docker build -t classificationbot/bot-remote:latest -f dockerfiles/bot-remote/Dockerfile .
-$ docker push classificationbot/bot-remote:latest
-
-$ docker build -t classificationbot/webapp:latest -f dockerfiles/webapp/Dockerfile .
-$ docker push classificationbot/webapp:latest
 ```
 
-When you've registered your own image, update the `image` value in `etc/standalone-bot-containers.yaml`.
+#### Deploying
 
-#### Creating and deleting your instance
+There are two options:
 
-`tasks.py` provides a handy shortcut for creating an instance
-with the Docker image specified in `etc/standalone-bot-containers.yaml`.
-Twitter credentials are pulled from `bot.ini` and stored as instance metadata.
+1. (Not used anymore) Google Compute Engine, container-optimized VM, supervisord + tweepy: [bot-standalone](./bot-standalone/)
+2. Google Container Engine, kubernetes, gunicorn + flask + tweepy: [follow this gist](https://gist.github.com/ento/3529a4fae8771e4e87e62370e6d25236)
 
-```
-$ python tasks.py create_standalone_instance
-$ python tasks.py delete_standalone_instance
-```
-
-#### When something goes wrong
-
-Or when you want to see if it's working for yourself:
-
-```
-## SSH into your instance
-$ gcloud compute ssh --zone us-central1-a bot-standalone
-
-## Wait until our container comes up:
-you@bot:~$ sudo watch docker ps
-
-## If it appears to be stuck, check kubelet's log:
-you@bot:~$ sudo less /var/log/kubelet.log
-
-## Once it's up, you can drop into its shell:
-you@bot:~$ sudo docker exec -it $(sudo docker ps --filter=ancestor=classificationbot/bot -q) bash
-
-## And run supervisorctl to check the bot.py process
-# supervisorctl
-
-## You can run it manually too:
-# cd /opt/bot/
-# python deepanimebot/bot.py --mock --debug
-```
 
 ## Special Thanks
+
 Special thanks to Francois Chollet (fchollet) for building the superb [Keras](https://github.com/fchollet/keras) deep learning library.
 We couldn't have brought a project ready to be used by non-machine learning people if it wasn't for the ease of use of Keras.
 

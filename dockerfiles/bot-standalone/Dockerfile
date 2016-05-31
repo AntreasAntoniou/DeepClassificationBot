@@ -1,3 +1,5 @@
+# docker build -t classificationbot/bot-standalone:latest -f dockerfiles/bot-standalone/Dockerfile .
+# docker push classificationbot/bot-standalone:latest
 FROM classificationbot/deploy-base:latest
 
 COPY ./requirements-bot.txt /tmp/
