@@ -38,14 +38,14 @@ def api_v1_classify():
 
 def create_app():
     app = Flask(__name__)
-    app.config.setdefault('DATASET_PATH', 'data/data.h5py')
+    app.config.setdefault('WORKSPACE_PATH', 'default_workspace')
     app.config.setdefault('INPUT_SHAPE', 128)
     app.config.setdefault('MODEL_NAME', 'deep_anime_model')
     app.register_blueprint(bp)
 
     app.extensions['classifier'] = classifiers.URLClassifier(
         classifiers.ImageClassifier(
-            app.config['DATASET_PATH'],
+            app.config['WORKSPACE_PATH'],
             app.config['INPUT_SHAPE'],
             app.config['MODEL_NAME']))
 

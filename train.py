@@ -57,14 +57,14 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
     if extract:
         print("Extracting data..")
-        X, y = data.extract_data(size=size)
+        X, y = data.extract_data(workspace=workspace, size=size)
 
         print("Preprocessing data..")
-        X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
+        X, y, nb_samples, num_categories = data.preprocess_data(X, y, workspace=workspace, save=True, subtract_mean=True)
 
     else:
         print("Loading data..")
-        h5f = h5py.File('data.hdf5', 'r')
+        h5f = h5py.File(workspace.data_path, 'r')
         nb_samples = h5f['nb_samples'].value
         num_categories = h5f['n_categories'].value
         h5f.close()
@@ -77,7 +77,7 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
     train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=nb_samples * training_percentage,
                                            val_indx=val_ids)
     # X_train, y_train, X_test, y_test = data.split_data(X, y, split_ratio=split)
-    X_train, y_train, X_val, y_val = data.load_dataset_bit_from_hdf5(train_ids, val_ids, only_train=False)
+    X_train, y_train, X_val, y_val = data.load_dataset_bit_from_hdf5(workspace, train_ids, val_ids, only_train=False)
     X_val = X_val / 255
 
     print("Building and Compiling model..")
@@ -85,7 +85,7 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
 
     if cont:
         # model.load_weights_until_layer("pre_trained_weights/latest_model_weights.hdf5", 26)
-        model.load_weights("pre_trained_weights/latest_model_weights.hdf5")
+        model.load_weights(workspace.latest_model_weights_path)
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=["accuracy"])
 
     print("Training..")
@@ -94,7 +94,7 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
     for i in range(epochs):
         train_ids = data.produce_train_indices(dataset_indx=data_ids, number_of_samples=15000, val_indx=val_ids)
 
-        X_train, y_train = data.load_dataset_bit_from_hdf5(train_ids, val_ids, only_train=True)
+        X_train, y_train = data.load_dataset_bit_from_hdf5(workspace, train_ids, val_ids, only_train=True)
 
         X_train = X_train / 255
         X_train = data.augment_data(X_train)
@@ -112,20 +112,20 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
         top_3_error = get_top_n_error(preds, y_val, top_k)
         print("Top 3 error: {}".format(top_3_error))
         if current_val_loss < best_performance:
-            model.save_weights("pre_trained_weights/model_weights.hdf5", overwrite=True)
+            model.save_weights(workspace.model_weights_path, overwrite=True)
             best_performance = current_val_loss
             print("Saving weights..")
-        model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
+        model.save_weights(workspace.latest_model_weights_path, overwrite=True)
 
 
 @cli.command()
 @pass_workspace
 def extract_data(workspace, size=256):
     print("Extracting data..")
-    X, y = data.extract_data(size=256)
+    X, y = data.extract_data(workspace, size=256)
 
     print("Preprocessing data..")
-    X, y, nb_samples, num_categories = data.preprocess_data(X, y, save=True, subtract_mean=True)
+    X, y, nb_samples, num_categories = data.preprocess_data(X, y, workspace=workspace, save=True, subtract_mean=True)
 
     return X, y, nb_samples, num_categories
 

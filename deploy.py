@@ -108,10 +108,10 @@ def deploy(workspace, target):
     import h5py
     # If used as script then run example use case
     image_size = 128  # change this to match your image size
-    dataset = h5py.File("data.hdf5", "r")
+    dataset = h5py.File(workspace.data_path, "r")
     average_image = dataset['mean'][:]
 
-    catname_to_categories = data.get_categories()
+    catname_to_categories = data.get_categories(workspace)
     category_to_catnames = {v: k for k, v in catname_to_categories.items()}
 
     # this should be run once and kept in memory for all predictions

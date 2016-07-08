@@ -160,7 +160,7 @@ def main(args):
     if args.classifier == 'mock':
         classifier = classifiers.MockClassifier()
     elif args.classifier == 'local':
-        classifier = classifiers.URLClassifier(classifiers.ImageClassifier(args.dataset_path, INPUT_SHAPE))
+        classifier = classifiers.URLClassifier(classifiers.ImageClassifier(args.workspace, INPUT_SHAPE))
     elif args.classifier == 'remote':
         classifier = classifiers.RemoteClassifier(args.remote_endpoint)
 
@@ -180,7 +180,7 @@ if __name__ == '__main__':
     parser.add('--access-token', required=True, env_var='ACCESS_TOKEN', help='Twitter access token')
     parser.add('--access-token-secret', required=True, env_var='ACCESS_TOKEN_SECRET', help='Twitter access token secret')
     parser.add('--classifier', choices=['mock', 'local', 'remote'], default='mock', help='Which classifier to use')
-    parser.add('--dataset-path', default='data/data.hdf5', help='Path to dataset when using a local calssifier')
+    parser.add('--workspace', default='workspace', help='Path to workspace when using a local calssifier')
     parser.add('--remote-endpoint', default=None, help='API endpoint to call when using a remote classifier')
     parser.add('--silent', action='store_true', default=False, help='Run bot without actually replying')
     parser.add('--debug', action='store_true', default=False, help='Set log level to debug')

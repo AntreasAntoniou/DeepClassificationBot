@@ -18,8 +18,10 @@ import numpy as np
 import h5py
 from keras.utils import np_utils
 
+from workspace import DEFAULT_WORKSPACE
 
-def extract_data(rootdir=None, size=256):
+
+def extract_data(workspace=DEFAULT_WORKSPACE, size=256):
     '''Extracts the data from the downloaded_images folders
         Attributes:
             size: The size to which to resize the images. All images must be the same size so that
@@ -30,14 +32,9 @@ def extract_data(rootdir=None, size=256):
 
     X = []
     y = []
-    if rootdir is not None:
-        search_folder = rootdir
-    else:
-        search_folder = os.path.dirname(os.path.abspath(__file__)) + "/downloaded_images/"
-
     count = 0
 
-    for subdir, dir, files in os.walk(search_folder):
+    for subdir, dir, files in os.walk(workspace.raw_images_dir):
         for file in files:
             if file.endswith(".jpg") or file.endswith(".png") or file.endswith(".jpeg"):
                 bits = subdir.split("/")
@@ -57,7 +54,7 @@ def extract_data(rootdir=None, size=256):
     return X, y
 
 
-def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
+def preprocess_data(X, y, workspace=DEFAULT_WORKSPACE, save=True, preset=None, subtract_mean=True):
     '''Preprocesses the data that have already been extracted with extract_data() method
        Attributes:
            X: A list containing images of shape (3, width, height)
@@ -85,7 +82,7 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
         X = X - mean
 
     # save categories for future use
-    pickle.dump(categories, open("data/categories.p", "wb"))
+    pickle.dump(categories, open(workspace.categories_path, "wb"))
 
     y = np_utils.to_categorical(y_temp, max(y_temp) + 1)
     if preset is not None:
@@ -95,7 +92,7 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     n_categories = len(categories)
 
     if save:
-        h5f = h5py.File('data/data.hdf5', 'w')
+        h5f = h5py.File(workspace.data_path, 'w')
         h5f.create_dataset('X', data=X)
         h5f.create_dataset('y', data=y)
         h5f.create_dataset('nb_samples', data=n_samples)
@@ -106,18 +103,18 @@ def preprocess_data(X, y, save=True, preset=None, subtract_mean=True):
     return X, y, n_samples, len(categories)
 
 
-def get_mean(dataset_path='data/data.hf5'):
+def get_mean(workspace=DEFAULT_WORKSPACE):
     try:
-        h5f = h5py.File(dataset_path, 'r')
+        h5f = h5py.File(workspace.dataset_path, 'r')
         return h5f['mean'][:]
     except IOError:
-        return np.load("data/mean.npy")
+        return np.load(workspace.mean_path)
 
 
-def get_categories():
+def get_categories(workspace=DEFAULT_WORKSPACE):
     '''Load categories names'''
 
-    categories = pickle.load(open("data/categories.p", "rb"))
+    categories = pickle.load(open(workspace.categories_path, "rb"))
     return categories
 
 
@@ -137,15 +134,15 @@ def produce_validation_indices(dataset_indx, number_of_samples):
     return val.tolist()
 
 
-def load_dataset_bit_from_hdf5(train_indices, val_indices, only_train=True):
+def load_dataset_bit_from_hdf5(workspace, train_indices, val_indices, only_train=True):
     if only_train:
-        h5f = h5py.File('data.hdf5', 'r')
+        h5f = h5py.File(workspace.data_path, 'r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         h5f.close()
         return X_train, y_train
     else:
-        h5f = h5py.File('data.hdf5', 'r')
+        h5f = h5py.File(workspace.data_path, 'r')
         X_train = h5f['X'][train_indices]
         y_train = h5f['y'][train_indices]
         X_val = h5f['X'][val_indices]

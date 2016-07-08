@@ -7,6 +7,7 @@ import requests
 
 import data
 import deploy
+from workspace import Workspace
 
 from .decorators import timeout
 from . import exceptions as exc
@@ -40,15 +41,16 @@ class MockClassifier(object):
 
 
 class ImageClassifier(object):
-    def __init__(self, dataset_path, input_shape, model_name='model'):
-        catname_to_categories = data.get_categories()
+    def __init__(self, workspace_path, input_shape, model_name='model'):
+        workspace = Workspace(workspace_path)
+        catname_to_categories = data.get_categories(workspace)
         self.category_to_catnames = {v: k for k, v in catname_to_categories.items()}
         self.model = deploy.load_model(
             input_shape=input_shape,
             n_outputs=len(catname_to_categories),
             model_name=model_name)
         self.input_shape = input_shape
-        self.average_image = data.get_mean(dataset_path)
+        self.average_image = data.get_mean(workspace)
 
     def classify(self, cvimage):
         normalized = deploy.normalize_cvimage(cvimage, size=self.input_shape, mean=self.average_image)

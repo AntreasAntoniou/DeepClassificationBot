@@ -20,7 +20,7 @@ from cmdbase import cli, pass_workspace
 
 
 class GoogleImageExtractor(object):
-    def __init__(self, search_key=''):
+    def __init__(self, download_folder, search_key=''):
         """ Google image search class
             Args:
                 search_key to be entered.
@@ -50,7 +50,7 @@ class GoogleImageExtractor(object):
         self.pic_info_list = []
 
         # file and folder path
-        self.folder_main_dir_prefix = 'downloaded_images/'
+        self.folder_main_dir_prefix = download_folder
 
     def reformat_search_for_spaces(self):
         """
@@ -238,7 +238,7 @@ def scrape(workspace, csv, n, dry_run):
     csv_input = codecs.getreader('utf8')(csv)
     queries = [' '.join(row.values()) for row in DictReader(csv_input) if len(row) > 0]
 
-    w = GoogleImageExtractor('')  # leave blanks if get the search list from file
+    w = GoogleImageExtractor(workspace.raw_images_dir, '')  # leave blanks if get the search list from file
     w.set_num_image_to_dl(n)
     w.set_searchlist(queries)  # replace the searclist
 
