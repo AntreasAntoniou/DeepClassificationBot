@@ -64,10 +64,9 @@ def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.
 
     else:
         print("Loading data..")
-        h5f = h5py.File(workspace.data_path, 'r')
-        nb_samples = h5f['nb_samples'].value
-        num_categories = h5f['n_categories'].value
-        h5f.close()
+        with h5py.File(workspace.data_path, 'r') as h5f:
+            nb_samples = h5f['nb_samples'].value
+            num_categories = h5f['n_categories'].value
 
     print("Number of categories: {}".format(num_categories))
     print("Number of samples {}".format(nb_samples))

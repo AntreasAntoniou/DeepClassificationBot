@@ -92,21 +92,20 @@ def preprocess_data(X, y, workspace=DEFAULT_WORKSPACE, save=True, preset=None, s
     n_categories = len(categories)
 
     if save:
-        h5f = h5py.File(workspace.data_path, 'w')
-        h5f.create_dataset('X', data=X)
-        h5f.create_dataset('y', data=y)
-        h5f.create_dataset('nb_samples', data=n_samples)
-        h5f.create_dataset('n_categories', data=n_categories)
-        h5f.create_dataset('mean', data=mean)
-        h5f.close()
+        with h5py.File(workspace.data_path, 'w') as h5f:
+            h5f.create_dataset('X', data=X)
+            h5f.create_dataset('y', data=y)
+            h5f.create_dataset('nb_samples', data=n_samples)
+            h5f.create_dataset('n_categories', data=n_categories)
+            h5f.create_dataset('mean', data=mean)
 
     return X, y, n_samples, len(categories)
 
 
 def get_mean(workspace=DEFAULT_WORKSPACE):
     try:
-        h5f = h5py.File(workspace.dataset_path, 'r')
-        return h5f['mean'][:]
+        with h5py.File(workspace.dataset_path, 'r') as h5f:
+            return h5f['mean'][:]
     except IOError:
         return np.load(workspace.mean_path)
 
@@ -136,18 +135,16 @@ def produce_validation_indices(dataset_indx, number_of_samples):
 
 def load_dataset_bit_from_hdf5(workspace, train_indices, val_indices, only_train=True):
     if only_train:
-        h5f = h5py.File(workspace.data_path, 'r')
-        X_train = h5f['X'][train_indices]
-        y_train = h5f['y'][train_indices]
-        h5f.close()
+        with h5py.File(workspace.data_path, 'r') as h5f:
+            X_train = f['X'][train_indices]
+            y_train = f['y'][train_indices]
         return X_train, y_train
     else:
-        h5f = h5py.File(workspace.data_path, 'r')
-        X_train = h5f['X'][train_indices]
-        y_train = h5f['y'][train_indices]
-        X_val = h5f['X'][val_indices]
-        y_val = h5f['y'][val_indices]
-        h5f.close()
+        with h5py.File(workspace.data_path, 'r') as h5f:
+            X_train = h5f['X'][train_indices]
+            y_train = h5f['y'][train_indices]
+            X_val = h5f['X'][val_indices]
+            y_val = h5f['y'][val_indices]
         return X_train, y_train, X_val, y_val
 
 

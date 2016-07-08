@@ -108,8 +108,7 @@ def deploy(workspace, target):
     import h5py
     # If used as script then run example use case
     image_size = 128  # change this to match your image size
-    dataset = h5py.File(workspace.data_path, "r")
-    average_image = dataset['mean'][:]
+    average_image = data.get_mean(workspace)
 
     catname_to_categories = data.get_categories(workspace)
     category_to_catnames = {v: k for k, v in catname_to_categories.items()}
