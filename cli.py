@@ -8,5 +8,6 @@ if __name__ == '__main__':
     from cmdbase import cli
     import google_image_scraper
     import train
+    import deploy
 
     cli()

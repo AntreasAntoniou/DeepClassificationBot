@@ -10,11 +10,15 @@ from __future__ import division
 import os
 from collections import namedtuple
 
+from six.moves import urllib
 import cv2
 import numpy as np
+import click
 
 import model as m
 import data
+from deepanimebot.classifiers import fetch_cvimage_from_url
+from cmdbase import cli, pass_workspace
 
 
 Prediction = namedtuple('Prediction', 'rank category probability')
@@ -83,31 +87,29 @@ def apply_model(X, model, categories, top_k=3):
     return res
 
 
-if __name__ == '__main__':
+def fetch_image_and_names(source, mean, size):
+    uri = urllib.parse.urlparse(source)
+    if uri.scheme in ('http', 'https'):
+        cvimage = fetch_cvimage_from_url(source)
+        normalized = normalize_cvimage(cvimage, size=size, mean=mean)
+        name = os.path.basename(source)
+        return [(normalized, name)]
+    elif os.path.isdir(source):
+        return get_data_from_folder(test_image_folder, mean=mean, size=size)
+    else:
+        image_and_name = get_data_from_file(source, mean=mean, size=size)
+        return [image_and_name]
+
+
+@cli.command()
+@click.argument('target', metavar='<file|directory|url>')
+@pass_workspace
+def deploy(workspace, target):
     import h5py
     # If used as script then run example use case
-    import sys
-    import urllib
     image_size = 128  # change this to match your image size
-    test_image_path = ''
-    test_image_folder = ''
-    image = False
-    folder = False
     dataset = h5py.File("data.hdf5", "r")
     average_image = dataset['mean'][:]
-
-    if sys.argv[1] == "--URL":
-        link = sys.argv[2]
-        bits = link.split("/")
-        test_image_path = "downloaded_images/" + str(bits[-1])
-        urllib.urlretrieve(link, test_image_path)
-        image = True
-    elif sys.argv[1] == "--image-path":
-        test_image_path = str(sys.argv[2])
-        image = True
-    elif sys.argv[1] == "--image-folder":
-        test_image_folder = sys.argv[2]
-        folder = True
 
     catname_to_categories = data.get_categories()
     category_to_catnames = {v: k for k, v in catname_to_categories.items()}
@@ -115,14 +117,9 @@ if __name__ == '__main__':
     # this should be run once and kept in memory for all predictions
     # as re-loading it is very time consuming
     model = load_model(input_shape=image_size, n_outputs=len(category_to_catnames))
+    image_and_names = fetch_image_and_names(target, average_image, image_size)
 
-    if folder:
-        image_names = get_data_from_folder(test_image_folder, mean=average_image, size=image_size)
-    elif image:
-        image_name = get_data_from_file(test_image_path, mean=average_image, size=image_size)
-        image_names = [image_name]
-
-    for image, name in image_names:
+    for image, name in image_and_names:
         y = apply_model(image, model, category_to_catnames)
         print("______________________________________________")
         print("Image Name: {}".format(name))
@@ -130,3 +127,7 @@ if __name__ == '__main__':
         for pred in y:
             print("{0}. {1} {2:.2%}".format(pred.rank, pred.category, pred.probability))
         print("______________________________________________")
+
+
+if __name__ == '__main__':
+    cli()
