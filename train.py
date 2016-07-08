@@ -23,12 +23,13 @@ from __future__ import absolute_import
 from __future__ import print_function
 from __future__ import division
 
-import argparse
 import h5py
 import numpy as np
+import click
 
 import data
 import model as m
+from cmdbase import cli, pass_workspace
 
 
 def get_top_n_error(preds, y, n):
@@ -47,7 +48,11 @@ def get_top_n_error(preds, y, n):
     return accuracy
 
 
-def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True, size=256, top_k=5):
+@cli.command()
+@click.option('--extract', is_flag=True)
+@click.option('--continue', 'cont', is_flag=True)
+@pass_workspace
+def run(workspace, epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=True, cont=True, size=256, top_k=5):
     '''Does the routine required to get the data, put them in needed format and start training the model
        saves weights whenever the model produces a better test result and keeps track of the best loss'''
     if extract:
@@ -113,7 +118,9 @@ def run(epochs=500, training_percentage=0.4, validation_percentage=0.1, extract=
         model.save_weights("pre_trained_weights/latest_model_weights.hdf5", overwrite=True)
 
 
-def extract_data(size=256):
+@cli.command()
+@pass_workspace
+def extract_data(workspace, size=256):
     print("Extracting data..")
     X, y = data.extract_data(size=256)
 
@@ -124,17 +131,4 @@ def extract_data(size=256):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--extract_data', dest='extract_data', action='store_const', const=True, default=False)
-    parser.add_argument('--run', dest='run', action='store_const', const=True, default=False)
-    parser.add_argument('--continue', dest='continue_training', action='store_const', const=True, default=False)
-    args = parser.parse_args()
-
-    extract_mode = args.extract_data
-    run_mode = args.run
-    continue_ = args.continue_training
-
-    if run_mode:
-        run(extract=extract_mode, cont=continue_)
-    elif extract_mode:
-        extract_data()
+    cli()

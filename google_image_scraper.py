@@ -2,16 +2,21 @@
 Google Image Scraper found at https://github.com/shuvronewscred/google-search-image-downloader,
 which we adapted for our project. Special thanks to shuvronewscred for his project.
 '''
-    
+
 from __future__ import absolute_import
 from __future__ import print_function
 import os
 import time
 import re
 import socket
+import codecs
 
+from backports.csv import DictReader
 from selenium import webdriver
 from pattern.web import URL, DOM
+import click
+
+from cmdbase import cli, pass_workspace
 
 
 class GoogleImageExtractor(object):
@@ -223,23 +228,24 @@ class GoogleImageExtractor(object):
         #         f.write(n)
         #         f.write('\n')
 
-if __name__ == '__main__':
-    import argparse
-    from backports import csv
-    import codecs
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('csv', nargs='?', type=argparse.FileType('rb'))
-    parser.add_argument('-n', type=int, default=350)
-    parser.add_argument('--dry-run', action='store_true', default=False)
-    args = parser.parse_args()
-
-    csv_input = codecs.getreader('utf8')(args.csv)
-    queries = [' '.join(row.values()) for row in csv.DictReader(csv_input)]
+@cli.command()
+@click.argument('csv', type=click.File('rb'))
+@click.option('-n', type=int, default=350)
+@click.option('--dry-run', is_flag=True)
+@pass_workspace
+def scrape(workspace, csv, n, dry_run):
+    csv_input = codecs.getreader('utf8')(csv)
+    queries = [' '.join(row.values()) for row in DictReader(csv_input) if len(row) > 0]
 
     w = GoogleImageExtractor('')  # leave blanks if get the search list from file
-    w.set_num_image_to_dl(args.n)
+    w.set_num_image_to_dl(n)
     w.set_searchlist(queries)  # replace the searclist
 
-    if not args.dry_run:
+    if not dry_run:
         w.multi_search_download()
+
+
+if __name__ == '__main__':
+    cli.set_default_command(scrape)
+    cli()
