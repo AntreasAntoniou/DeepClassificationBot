@@ -2,14 +2,12 @@
 '''
 Click groups for a command-line interface.
 '''
-from collections import namedtuple
-import functools
-
 import click
 from click_default_group import DefaultGroup
 
+from workspace import Workspace
 
-Workspace = namedtuple('Workspace', 'home')
+
 pass_workspace = click.make_pass_decorator(Workspace)
 
 
@@ -29,7 +27,7 @@ def workspace_option(required=False):
     return decorator
 
 
-@click.group()
+@click.group(cls=DefaultGroup)
 @workspace_option(required=True)
 @click.pass_context
 def cli(ctx, workspace):
