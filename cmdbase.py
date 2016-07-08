@@ -20,31 +20,17 @@ def workspace_option(required=False):
         option_type = click.Path()
 
     def decorator(fn):
-        @functools.wraps(fn)
-        def wrapper(*args, **kwargs):
-            return fn(*args, **kwargs)
         return click.option(
             '--workspace',
             envvar='WORKSPACE',
             default='workspace',
-            type=option_type)(wrapper)
+            type=option_type)(fn)
 
     return decorator
 
 
-@click.group(cls=DefaultGroup)
+@click.group()
 @workspace_option(required=True)
 @click.pass_context
 def cli(ctx, workspace):
     ctx.obj = Workspace(workspace)
-
-
-@click.group()
-def init_group():
-    pass
-
-
-@init_group.command()
-@workspace_option(required=False)
-def init(workspace):
-    print(workspace)
