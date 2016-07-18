@@ -177,9 +177,7 @@ def resize(img, size):
             img: The image to resize
             size: The size to resize the image
     """
-    print("preresize")
     img = cv2.resize(img, (size, size))
-    print("preroll")
     img = np.rollaxis(img, 2)
     return img
 
